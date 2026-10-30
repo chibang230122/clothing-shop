@@ -1,4 +1,3 @@
-
 package com.example.clothingshop.repository;
 
 import com.example.clothingshop.entity.Product;
@@ -16,6 +15,9 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     List<Product> findByCategory_CategoryIdAndIsActiveTrue(
             Integer categoryId
     );
+
+    // Kiểm tra sản phẩm trùng tên
+    boolean existsByProductNameIgnoreCase(String productName);
 
     @Query("""
         SELECT p
@@ -35,4 +37,8 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
             @Param("minPrice") BigDecimal minPrice,
             @Param("maxPrice") BigDecimal maxPrice
     );
+
+    boolean existsByCategory_CategoryId(Integer categoryId);
+
+    List<Product> findByProductIdInAndIsActiveTrueOrderByProductIdDesc(List<Integer> productIds);
 }

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Thêm sản phẩm')}"></head>
+<body>
+
+<div th:replace="~{fragments/bootstrap-menu :: menu}"></div>
+
+<div class="container mt-4">
+    <h2>Thêm sản phẩm</h2>
+
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <form th:action="@{/admin/products/save}" th:object="${product}" method="post">
+        <div class="mb-3">
+            <label class="form-label">Tên sản phẩm</label>
+            <input type="text" th:field="*{productName}"
+                   class="form-control" maxlength="200" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Danh mục</label>
+            <select th:field="*{category.categoryId}" class="form-select" required>
+                <option value="">-- Chọn danh mục --</option>
+                <option th:each="category : ${categories}"
+                        th:value="${category.categoryId}"
+                        th:text="${category.categoryName}">
+                </option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Mô tả</label>
+            <textarea th:field="*{description}" class="form-control"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Giá sản phẩm (VNĐ)</label>
+            <input type="number" th:field="*{basePrice}"
+                   class="form-control" min="0" step="1000" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Đường dẫn ảnh</label>
+            <input type="text" th:field="*{imageUrl}"
+                   class="form-control" maxlength="500">
+        </div>
+
+        <div class="form-check mb-3">
+            <input type="checkbox" th:field="*{isActive}" class="form-check-input">
+            <label class="form-check-label">Đang bán</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Lưu sản phẩm</button>
+        <a th:href="@{/admin/products}" class="btn btn-secondary">Quay lại</a>
+    </form>
+</div>
+
+</body>
+</html>

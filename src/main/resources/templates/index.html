@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -38,6 +37,10 @@
             margin-left: 22px;
         }
 
+        nav a:hover {
+            color: #ddd;
+        }
+
         .banner {
             padding: 65px 7%;
             background: #e8e3dc;
@@ -63,6 +66,10 @@
             border-radius: 4px;
         }
 
+        .banner a:hover {
+            background: #444;
+        }
+
         .container {
             padding: 40px 7%;
         }
@@ -82,6 +89,11 @@
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 2px 8px #00000010;
+            transition: transform 0.2s;
+        }
+
+        .product:hover {
+            transform: translateY(-4px);
         }
 
         .product img {
@@ -89,6 +101,16 @@
             height: 230px;
             object-fit: cover;
             background: #eee;
+        }
+
+        .product-img-empty {
+            width: 100%;
+            height: 230px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #eee;
+            color: #777;
         }
 
         .product-info {
@@ -113,10 +135,27 @@
             line-height: 1.5;
         }
 
+        .detail-button {
+            display: block;
+            margin-top: 15px;
+            padding: 10px;
+            background: #111;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .detail-button:hover {
+            background: #444;
+        }
+
         .empty {
             padding: 25px;
             background: white;
             border-radius: 6px;
+            text-align: center;
+            color: #666;
         }
 
         footer {
@@ -156,26 +195,19 @@
 
 <body>
 
-<header>
-    <h1>CLOTHING SHOP</h1>
-
-    <nav>
-        <a th:href="@{/}">Trang chủ</a>
-        <a href="#products">Sản phẩm</a>
-        <a href="#footer">Liên hệ</a>
-    </nav>
-</header>
+<div th:replace="~{fragments/menu :: menu}"></div>
 
 <section class="banner">
     <h2>Phong cách của riêng bạn</h2>
     <p>Khám phá những mẫu thời trang phù hợp với cá tính của bạn.</p>
-    <a href="#products">Khám phá ngay</a>
+    <a th:href="@{/products}">Khám phá ngay</a>
 </section>
 
 <main class="container" id="products">
     <h2>Sản phẩm nổi bật</h2>
 
-    <div class="product-list" th:if="${!#lists.isEmpty(products)}">
+    <div class="product-list"
+         th:if="${products != null and !#lists.isEmpty(products)}">
 
         <article class="product" th:each="product : ${products}">
 
@@ -185,8 +217,15 @@
                     th:alt="${product.productName}"
             >
 
+            <div class="product-img-empty"
+                 th:unless="${product.imageUrl != null and !#strings.isEmpty(product.imageUrl)}">
+                Chưa có hình ảnh
+            </div>
+
             <div class="product-info">
-                <h3 th:text="${product.productName}">Tên sản phẩm</h3>
+                <h3 th:text="${product.productName}">
+                    Tên sản phẩm
+                </h3>
 
                 <p class="price"
                    th:text="${#numbers.formatDecimal(product.basePrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">
@@ -194,24 +233,34 @@
                 </p>
 
                 <p class="description"
-                   th:if="${product.description != null}"
+                   th:if="${product.description != null and !#strings.isEmpty(product.description)}"
                    th:text="${product.description}">
                     Mô tả sản phẩm
                 </p>
+
+                <a class="detail-button"
+                   th:href="@{/products/{id}(id=${product.productId})}">
+                    Xem chi tiết
+                </a>
             </div>
 
         </article>
     </div>
 
     <p class="empty"
-       th:if="${#lists.isEmpty(products)}">
+       th:if="${products == null or #lists.isEmpty(products)}">
         Hiện chưa có sản phẩm nào để hiển thị.
     </p>
+
+    <div style="text-align: center; margin-top: 30px;">
+        <a th:href="@{/products}" class="detail-button"
+           style="display: inline-block; padding: 12px 25px;">
+            Xem tất cả sản phẩm
+        </a>
+    </div>
 </main>
 
-<footer id="footer">
-    <p>© 2026 Clothing Shop - Thời trang dành cho bạn</p>
-</footer>
+<div th:replace="~{fragments/footer :: footer}"></div>
 
 </body>
 </html>
