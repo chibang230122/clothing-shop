@@ -1,31 +1,108 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
 <body>
-<nav th:fragment="menu" class="navbar navbar-expand-lg navbar-dark bg-dark">
+
+<nav th:fragment="menu"
+     class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
-        <a class="navbar-brand fw-bold" th:href="@{/}">CLOTHING SHOP</a>
+
+        <a class="navbar-brand fw-bold"
+           th:href="@{/}">CLOTHING SHOP</a>
 
         <button class="navbar-toggler" type="button"
-                data-bs-toggle="collapse" data-bs-target="#navbarMenu"
-                aria-controls="navbarMenu" aria-expanded="false"
-                aria-label="Mở menu">
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse" id="navbarMenu">
-            <ul class="navbar-nav ms-auto">
+        <div class="collapse navbar-collapse"
+             id="navbarMenu">
+
+            <ul class="navbar-nav ms-auto align-items-lg-center">
+
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/}">Trang chủ</a>
+                    <a class="nav-link" th:href="@{/}">
+                        Trang chủ
+                    </a>
                 </li>
+
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/products}">Sản phẩm</a>
+                    <a class="nav-link" th:href="@{/products}">
+                        Sản phẩm
+                    </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/#footer}">Liên hệ</a>
+
+                <!-- Chỉ Customer -->
+                <li class="nav-item"
+                    sec:authorize="hasRole('CUSTOMER')">
+                    <a class="nav-link"
+                       th:href="@{/account/orders}">
+                        Đơn hàng của tôi
+                    </a>
                 </li>
+
+                <!-- Chỉ Admin -->
+                <li class="nav-item"
+                    sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link"
+                       th:href="@{/admin}">
+                        Quản trị
+                    </a>
+                </li>
+
+                <!-- Người dùng đã đăng nhập -->
+                <li class="nav-item"
+                    sec:authorize="isAuthenticated()">
+                    <a class="nav-link"
+                       th:href="@{/account/profile}">
+                        Tài khoản
+                    </a>
+                </li>
+
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link" th:href="@{/account/change-password}">Đổi mật khẩu</a>
+                </li>
+
+                <!-- Chưa đăng nhập -->
+                <li class="nav-item"
+                    sec:authorize="isAnonymous()">
+                    <a class="nav-link" th:href="@{/login}">
+                        Đăng nhập
+                    </a>
+                </li>
+
+                <li class="nav-item"
+                    sec:authorize="isAnonymous()">
+                    <a class="nav-link"
+                       th:href="@{/register}">
+                        Đăng ký
+                    </a>
+                </li>
+
+                <!-- Đăng xuất bằng POST -->
+                <li class="nav-item"
+                    sec:authorize="isAuthenticated()">
+
+                    <form th:action="@{/logout}"
+                          method="post" class="ms-lg-2">
+
+                        <input type="hidden"
+                               th:name="${_csrf.parameterName}"
+                               th:value="${_csrf.token}">
+
+                        <button class="btn btn-outline-light btn-sm"
+                                type="submit">
+                            Đăng xuất
+                        </button>
+                    </form>
+                </li>
+
             </ul>
         </div>
     </div>
 </nav>
+
 </body>
 </html>

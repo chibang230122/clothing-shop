@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Quản lý tài khoản')}"></head>
+<body class="admin-bg">
+<div th:replace="~{fragments/admin-menu :: menu}"></div>
+<main class="container py-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+        <div>
+            <div class="text-secondary small fw-semibold">QUẢN TRỊ / NGƯỜI DÙNG</div>
+            <h2 class="fw-bold mb-0">Quản lý tài khoản</h2></div>
+        <a th:href="@{/admin}" class="btn btn-outline-secondary">Về tổng quan</a>
+    </div>
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    <form th:action="@{/admin/accounts}" method="get" class="card border-0 shadow-sm p-3 mb-3">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-7"><label class="form-label">Tên hoặc email</label><input class="form-control"
+                                                                                         name="keyword"
+                                                                                         th:value="${keyword}"
+                                                                                         placeholder="Nhập tên hoặc email">
+            </div>
+            <div class="col-md-3"><label class="form-label">Vai trò</label>
+                <select class="form-select" name="role">
+                    <option value="">Tất cả</option>
+                    <option value="ADMIN" th:selected="${roleFilter == 'ADMIN'}">ADMIN</option>
+                    <option value="STAFF" th:selected="${roleFilter == 'STAFF'}">STAFF</option>
+                    <option value="CUSTOMER" th:selected="${roleFilter == 'CUSTOMER'}">CUSTOMER</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-grid">
+                <button class="btn btn-dark">Tìm kiếm</button>
+            </div>
+        </div>
+    </form>
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Người dùng</th>
+                    <th>Số điện thoại</th>
+                    <th>Vai trò</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="account : ${accountPage.content}">
+                    <td th:text="${account.userId}"></td>
+                    <td><strong th:text="${account.fullName}"></strong>
+                        <div class="text-secondary small" th:text="${account.email}"></div>
+                    </td>
+                    <td th:text="${account.phone != null ? account.phone : '—'}"></td>
+                    <td><span class="badge text-bg-secondary" th:text="${account.role.roleName}"></span></td>
+                    <td><span class="badge"
+                              th:classappend="${account.isActive ? ' text-bg-success' : ' text-bg-danger'}"
+                              th:text="${account.isActive ? 'Đang hoạt động' : 'Đã khóa'}"></span></td>
+                    <td>
+                        <div th:if="${account.role.roleName != 'ADMIN'}" class="d-flex flex-wrap gap-2">
+                            <form th:action="@{/admin/accounts/{id}/role(id=${account.userId})}" method="post"
+                                  class="d-flex gap-1">
+                                <select class="form-select form-select-sm" name="roleName" aria-label="Chọn vai trò">
+                                    <option value="CUSTOMER" th:selected="${account.role.roleName == 'CUSTOMER'}">
+                                        CUSTOMER
+                                    </option>
+                                    <option value="STAFF" th:selected="${account.role.roleName == 'STAFF'}">STAFF
+                                    </option>
+                                </select>
+                                <button class="btn btn-sm btn-outline-primary" type="submit">Lưu quyền</button>
+                            </form>
+                            <form th:action="@{/admin/accounts/{id}/status(id=${account.userId})}" method="post"
+                                  onsubmit="return confirm('Bạn có chắc muốn thay đổi trạng thái tài khoản?')">
+                                <input type="hidden" name="active" th:value="${!account.isActive}">
+                                <button class="btn btn-sm"
+                                        th:classappend="${account.isActive ? ' btn-outline-danger' : ' btn-outline-success'}"
+                                        th:text="${account.isActive ? 'Khóa' : 'Mở khóa'}">Khóa
+                                </button>
+                            </form>
+                        </div>
+                        <small th:if="${account.role.roleName == 'ADMIN'}" class="text-muted">Tài khoản quản trị được
+                            bảo vệ</small>
+                    </td>
+                </tr>
+                <tr th:if="${accountPage.empty}">
+                    <td colspan="6" class="text-center text-secondary p-4">Không tìm thấy tài khoản phù hợp.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <nav class="d-flex align-items-center justify-content-between mt-3" th:if="${accountPage.totalPages > 1}">
+        <span class="small text-secondary"
+              th:text="|Trang ${accountPage.number + 1} / ${accountPage.totalPages}|"></span>
+        <div class="btn-group">
+            <a class="btn btn-outline-dark btn-sm" th:if="${accountPage.hasPrevious()}"
+               th:href="@{/admin/accounts(page=${accountPage.number - 1},keyword=${keyword},role=${roleFilter})}">Trước</a>
+            <a class="btn btn-outline-dark btn-sm" th:if="${accountPage.hasNext()}"
+               th:href="@{/admin/accounts(page=${accountPage.number + 1},keyword=${keyword},role=${roleFilter})}">Sau</a>
+        </div>
+    </nav>
+    <p class="small text-secondary mt-4">Chỉ ADMIN có thể quản lý tài khoản. Không hiển thị mật khẩu, không thay đổi vai
+        trò hoặc khóa các tài khoản ADMIN tại đây.</p>
+</main>
+</body>
+</html>
