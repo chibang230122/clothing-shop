@@ -29,4 +29,9 @@ public interface ShopOrderRepository extends JpaRepository<ShopOrder, Long> {
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate
     );
+    List<ShopOrder> findByUser_EmailIgnoreCaseOrderByOrderDateDesc(
+            String email);
+
+    java.util.Optional<ShopOrder> findByOrderIdAndUser_EmailIgnoreCase(
+            Long orderId, String email);
 }

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<body>
+<nav th:fragment="menu" class="navbar navbar-expand-lg navbar-dark admin-navbar sticky-top shadow-sm">
+    <div class="container-fluid px-3 px-lg-4">
+        <a class="navbar-brand fw-bold" th:href="@{/admin}">CLOTHING <span class="text-warning">ADMIN</span></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="adminNav">
+            <ul class="navbar-nav me-auto gap-lg-2">
+                <li class="nav-item"><a class="nav-link" th:href="@{/admin}">Tổng quan</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/admin/products}">Sản phẩm</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/admin/categories}">Danh mục</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/admin/accounts}">Tài khoản</a></li>
+            </ul>
+            <div class="d-flex flex-wrap align-items-center gap-3">
+                <a class="admin-toplink" th:href="@{/}">Về cửa hàng</a>
+                <a class="admin-toplink" th:href="@{/account/profile}">Hồ sơ</a>
+                <a class="admin-toplink" th:href="@{/account/change-password}">Đổi mật khẩu</a>
+                <form th:action="@{/logout}" method="post" class="m-0">
+                    <button class="btn btn-outline-light btn-sm" type="submit">Đăng xuất</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+</body>
+</html>
