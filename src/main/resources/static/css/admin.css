@@ -1,0 +1,78 @@
+.admin-bg {
+    background: #f3f5fa;
+    min-height: 100vh;
+}
+
+.admin-navbar {
+    background: #192236;
+}
+
+.admin-navbar .nav-link {
+    color: #d5dbe8;
+}
+
+.admin-navbar .nav-link:hover {
+    color: #fff;
+}
+
+.admin-toplink {
+    color: #d5dbe8;
+    font-size: .9rem;
+    text-decoration: none;
+}
+
+.admin-toplink:hover {
+    color: #fff;
+}
+
+.admin-hero {
+    border-radius: 18px;
+    padding: 2.2rem;
+    color: #fff;
+    background: linear-gradient(120deg, #222e49, #374973);
+}
+
+.admin-stat {
+    background: #fff;
+    border: 1px solid #e5eaf2;
+    border-radius: 15px;
+    padding: 1.35rem;
+    height: 100%;
+    box-shadow: 0 5px 18px #1b2a4a08;
+}
+
+.admin-stat-label {
+    color: #63718a;
+    font-size: .9rem;
+    margin-bottom: .4rem;
+}
+
+.admin-stat-number {
+    color: #192236;
+    font-size: 2rem;
+    font-weight: 750;
+    line-height: 1.2;
+    margin-bottom: .4rem;
+}
+
+.admin-quick {
+    display: block;
+    height: 100%;
+    color: #263149;
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 15px;
+    border: 1px solid #e5eaf2;
+    text-decoration: none;
+    box-shadow: 0 5px 18px #1b2a4a08;
+}
+
+.admin-quick small {
+    color: #63718a;
+}
+
+.admin-quick:hover {
+    border-color: #607bbb;
+    color: #273d6c;
+    box-shadow: 0 12px 25px #1b2a4a18;
+}

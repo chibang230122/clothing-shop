@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Quản lý biến thể')}"></head>
+<body class="bg-light">
+
+<div th:replace="~{fragments/admin-menu :: menu}"></div>
+
+<div class="container py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h2 class="mb-0">Quản lý biến thể sản phẩm</h2>
+        <a th:href="@{/admin/products}" class="btn btn-outline-secondary">
+            Quay lại sản phẩm
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <p class="mb-3">
+                <strong>Sản phẩm:</strong>
+                <span th:text="${product.productName}"></span>
+            </p>
+
+            <div th:if="${success != null}" class="alert alert-success"
+                 role="alert" th:text="${success}"></div>
+
+            <div th:if="${error != null}" class="alert alert-danger"
+                 role="alert" th:text="${error}"></div>
+
+            <a th:href="@{/admin/products/{id}/variants/add(id=${product.productId})}"
+               class="btn btn-primary mb-3">
+                + Thêm biến thể
+            </a>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>SKU</th>
+                        <th>Size</th>
+                        <th>Màu sắc</th>
+                        <th>Tồn kho</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="item : ${variants}">
+                        <td th:text="${item.variantId}"></td>
+                        <td th:text="${item.sku}"></td>
+                        <td th:text="${item.size}"></td>
+                        <td th:text="${item.color}"></td>
+                        <td th:text="${item.stockQuantity}"></td>
+
+                        <td>
+                            <span th:if="${item.isActive}" class="badge bg-success">
+                                Đang kinh doanh
+                            </span>
+                            <span th:unless="${item.isActive}" class="badge bg-secondary">
+                                Ngừng kinh doanh
+                            </span>
+                        </td>
+
+                        <td>
+                            <div class="d-flex flex-wrap gap-2">
+                                <a th:href="@{/admin/products/{productId}/variants/edit/{variantId}(productId=${product.productId},variantId=${item.variantId})}"
+                                   class="btn btn-warning btn-sm">
+                                    Sửa
+                                </a>
+
+                                <form th:if="${item.isActive}"
+                                      th:action="@{/admin/products/{id}/variants/deactivate/{variantId}(id=${product.productId},variantId=${item.variantId})}"
+                                      method="post"
+                                      onsubmit="return confirm('Bạn có chắc muốn ngừng kinh doanh biến thể này?');">
+
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        Ngừng kinh doanh
+                                    </button>
+                                </form>
+
+                                <span th:unless="${item.isActive}" class="text-muted">
+                                    Đã ngừng
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(variants)}">
+                        <td colspan="7" class="text-center text-muted py-4">
+                            Sản phẩm chưa có biến thể nào.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

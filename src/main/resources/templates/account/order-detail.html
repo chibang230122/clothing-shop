@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Chi tiết đơn hàng')}">
+</head>
+<body>
+
+<div th:replace="~{fragments/bootstrap-menu :: menu}"></div>
+
+<div class="container py-5">
+    <h3>Chi tiết đơn hàng</h3>
+
+    <div class="card mt-4">
+        <div class="card-body">
+
+            <p>Mã đơn:
+                <strong th:text="${order.orderCode}"></strong>
+            </p>
+
+            <p>Người nhận:
+                <span th:text="${order.recipientName}"></span>
+            </p>
+
+            <p>Số điện thoại:
+                <span th:text="${order.recipientPhone}"></span>
+            </p>
+
+            <p>Địa chỉ:
+                <span th:text="${order.shippingAddress}"></span>
+            </p>
+
+            <p>Trạng thái:
+                <span th:text="${order.orderStatus}"></span>
+            </p>
+
+            <p>Thanh toán:
+                <span th:text="${order.paymentStatus}"></span>
+            </p>
+
+            <h5>Tổng tiền:
+                <span th:text="${order.totalAmount}"></span>
+            </h5>
+
+            <a th:href="@{/account/orders}"
+               class="btn btn-outline-dark mt-3">
+                Quay lại
+            </a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

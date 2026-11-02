@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clothing Shop - Thời trang</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f7f7f7;
+            color: #222;
+        }
+
+        header {
+            background: #111;
+            color: white;
+            padding: 20px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 25px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 22px;
+        }
+
+        nav a:hover {
+            color: #ddd;
+        }
+
+        nav .home-logout {
+            background: transparent;
+            color: #fff;
+            border: 1px solid #777;
+            padding: 7px 10px;
+            border-radius: 5px;
+            margin-left: 12px;
+            cursor: pointer;
+        }
+
+        nav .home-logout:hover {
+            background: #333;
+        }
+
+        .banner {
+            padding: 65px 7%;
+            background: #e8e3dc;
+            text-align: center;
+        }
+
+        .banner h2 {
+            font-size: 36px;
+            margin-bottom: 12px;
+        }
+
+        .banner p {
+            color: #555;
+            margin-bottom: 22px;
+        }
+
+        .banner a {
+            display: inline-block;
+            background: #111;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .banner a:hover {
+            background: #444;
+        }
+
+        .container {
+            padding: 40px 7%;
+        }
+
+        .container h2 {
+            margin-bottom: 25px;
+        }
+
+        .product-list {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 22px;
+        }
+
+        .product {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px #00000010;
+            transition: transform 0.2s;
+        }
+
+        .product:hover {
+            transform: translateY(-4px);
+        }
+
+        .product img {
+            width: 100%;
+            height: 230px;
+            object-fit: cover;
+            background: #eee;
+        }
+
+        .product-img-empty {
+            width: 100%;
+            height: 230px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #eee;
+            color: #777;
+        }
+
+        .product-info {
+            padding: 15px;
+        }
+
+        .product-info h3 {
+            font-size: 17px;
+            margin-bottom: 10px;
+        }
+
+        .price {
+            color: #c0392b;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .description {
+            margin-top: 10px;
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .detail-button {
+            display: block;
+            margin-top: 15px;
+            padding: 10px;
+            background: #111;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .detail-button:hover {
+            background: #444;
+        }
+
+        .empty {
+            padding: 25px;
+            background: white;
+            border-radius: 6px;
+            text-align: center;
+            color: #666;
+        }
+
+        footer {
+            background: #111;
+            color: white;
+            text-align: center;
+            padding: 22px;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .product-list {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 550px) {
+            header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            nav a {
+                margin: 0 7px;
+            }
+
+            .banner h2 {
+                font-size: 27px;
+            }
+
+            .product-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div th:replace="~{fragments/menu :: menu}"></div>
+
+<section class="banner">
+    <h2>Phong cách của riêng bạn</h2>
+    <p>Khám phá những mẫu thời trang phù hợp với cá tính của bạn.</p>
+    <a th:href="@{/products}">Khám phá ngay</a>
+</section>
+
+<main class="container" id="products">
+    <h2>Sản phẩm nổi bật</h2>
+
+    <div class="product-list"
+         th:if="${products != null and !#lists.isEmpty(products)}">
+
+        <article class="product" th:each="product : ${products}">
+
+            <img
+                    th:if="${product.imageUrl != null and !#strings.isEmpty(product.imageUrl)}"
+                    th:src="${product.imageUrl}"
+                    th:alt="${product.productName}"
+            >
+
+            <div class="product-img-empty"
+                 th:unless="${product.imageUrl != null and !#strings.isEmpty(product.imageUrl)}">
+                Chưa có hình ảnh
+            </div>
+
+            <div class="product-info">
+                <h3 th:text="${product.productName}">
+                    Tên sản phẩm
+                </h3>
+
+                <p class="price"
+                   th:text="${#numbers.formatDecimal(product.basePrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                    150.000 đ
+                </p>
+
+                <p class="description"
+                   th:if="${product.description != null and !#strings.isEmpty(product.description)}"
+                   th:text="${product.description}">
+                    Mô tả sản phẩm
+                </p>
+
+                <a class="detail-button"
+                   th:href="@{/products/{id}(id=${product.productId})}">
+                    Xem chi tiết
+                </a>
+            </div>
+
+        </article>
+    </div>
+
+    <p class="empty"
+       th:if="${products == null or #lists.isEmpty(products)}">
+        Hiện chưa có sản phẩm nào để hiển thị.
+    </p>
+
+    <div style="text-align: center; margin-top: 30px;">
+        <a th:href="@{/products}" class="detail-button"
+           style="display: inline-block; padding: 12px 25px;">
+            Xem tất cả sản phẩm
+        </a>
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+</html>

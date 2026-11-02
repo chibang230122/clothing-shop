@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Chi tiết sản phẩm - Clothing Shop')}"></head>
+<body class="bg-light">
+
+<div th:replace="~{fragments/bootstrap-menu :: menu}"></div>
+
+<main class="container py-5">
+
+    <div class="mb-4">
+        <a th:href="@{/products}" class="btn btn-outline-dark btn-sm">
+            &larr; Quay lại danh sách
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4 p-md-5">
+            <div class="row g-4">
+
+                <!-- HÌNH ẢNH -->
+                <div class="col-12 col-md-5">
+                    <img th:if="${product.imageUrl != null and !#strings.isEmpty(product.imageUrl)}"
+                         th:src="${product.imageUrl}"
+                         th:alt="${product.productName}"
+                         class="img-fluid rounded w-100"
+                         style="max-height:450px;object-fit:cover;">
+
+                    <div th:unless="${product.imageUrl != null and !#strings.isEmpty(product.imageUrl)}"
+                         class="bg-secondary-subtle rounded d-flex align-items-center justify-content-center"
+                         style="height:350px;">
+                        <span class="text-secondary">Chưa có hình ảnh</span>
+                    </div>
+                </div>
+
+                <!-- THÔNG TIN SẢN PHẨM -->
+                <div class="col-12 col-md-7">
+                    <h2 class="fw-bold mb-3"
+                        th:text="${product.productName}">Tên sản phẩm</h2>
+
+                    <h3 class="text-danger fw-bold mb-4"
+                        th:text="${#numbers.formatDecimal(product.basePrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                        150.000 đ
+                    </h3>
+
+                    <h5 class="fw-bold">Mô tả sản phẩm</h5>
+
+                    <p class="text-secondary"
+                       th:if="${product.description != null and !#strings.isEmpty(product.description)}"
+                       th:text="${product.description}">
+                        Mô tả sản phẩm
+                    </p>
+
+                    <p class="text-secondary"
+                       th:if="${product.description == null or #strings.isEmpty(product.description)}">
+                        Chưa có mô tả cho sản phẩm này.
+                    </p>
+
+                    <hr>
+
+                    <h5 class="fw-bold mb-3">Kích thước và màu sắc</h5>
+
+                    <div class="table-responsive"
+                         th:if="${variants != null and !#lists.isEmpty(variants)}">
+
+                        <table class="table table-bordered table-hover align-middle">
+                            <thead class="table-dark">
+                            <tr>
+                                <th>Size</th>
+                                <th>Màu sắc</th>
+                                <th>Mã SKU</th>
+                                <th>Tồn kho</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                            </thead>
+
+                            <tbody>
+                            <tr th:each="variant : ${variants}">
+                                <td th:text="${variant.size}">M</td>
+                                <td th:text="${variant.color}">Đen</td>
+                                <td th:text="${variant.sku}">AO001-M-DEN</td>
+                                <td th:text="${variant.stockQuantity}">10</td>
+                                <td>
+                                    <span th:if="${variant.stockQuantity != null and variant.stockQuantity > 0}"
+                                          class="badge bg-success">Còn hàng</span>
+
+                                    <span th:unless="${variant.stockQuantity != null and variant.stockQuantity > 0}"
+                                          class="badge bg-danger">Hết hàng</span>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="alert alert-warning"
+                         th:if="${variants == null or #lists.isEmpty(variants)}">
+                        Sản phẩm hiện chưa có biến thể đang hoạt động.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+</html>

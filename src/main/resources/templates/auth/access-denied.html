@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('403 - Truy cập bị từ chối')}">
+</head>
+<body>
+<div class="container text-center py-5">
+    <h1 class="text-danger">403</h1>
+    <h3>Bạn không có quyền truy cập</h3>
+    <p>Tài khoản hiện tại không được phép xem trang này.</p>
+    <a th:href="@{/}" class="btn btn-dark">
+        Về trang chủ
+    </a>
+</div>
+</body>
+</html>

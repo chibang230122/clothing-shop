@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Quản lý sản phẩm')}"></head>
+<body>
+
+<div th:replace="~{fragments/admin-menu :: menu}"></div>
+
+<div class="container mt-4">
+    <h2>Quản lý sản phẩm</h2>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <form th:action="@{/admin/products}" method="get" class="card card-body mb-3">
+        <div class="row g-2">
+            <div class="col-md-3">
+                <label class="form-label">Tên sản phẩm</label>
+                <input type="text" name="keyword" class="form-control"
+                       placeholder="Nhập tên sản phẩm"
+                       th:value="${keyword}">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Danh mục</label>
+                <select name="categoryId" class="form-select">
+                    <option value="">Tất cả danh mục</option>
+                    <option th:each="category : ${categories}"
+                            th:value="${category.categoryId}"
+                            th:text="${category.categoryName}"
+                            th:selected="${categoryId != null and categoryId == category.categoryId}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Giá từ</label>
+                <input type="number" name="minPrice" class="form-control"
+                       min="0" placeholder="0"
+                       th:value="${minPrice}">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Giá đến</label>
+                <input type="number" name="maxPrice" class="form-control"
+                       min="0" placeholder="500000"
+                       th:value="${maxPrice}">
+            </div>
+
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-success me-2">Tìm</button>
+                <a th:href="@{/admin/products}" class="btn btn-secondary">Xóa lọc</a>
+            </div>
+        </div>
+    </form>
+
+    <a th:href="@{/admin/products/add}" class="btn btn-primary mb-3">
+        Thêm sản phẩm
+    </a>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-hover align-middle">
+            <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Tên sản phẩm</th>
+                <th>Danh mục</th>
+                <th>Giá</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="product : ${products}">
+                <td th:text="${product.productId}"></td>
+                <td th:text="${product.productName}"></td>
+                <td th:text="${product.category.categoryName}"></td>
+                <td th:text="${product.basePrice}"></td>
+
+                <td>
+                    <span th:if="${product.isActive}" class="badge bg-success">
+                        Đang bán
+                    </span>
+                    <span th:unless="${product.isActive}" class="badge bg-secondary">
+                        Ngừng bán
+                    </span>
+                </td>
+
+                <td>
+                    <a th:href="@{/admin/products/edit/{id}(id=${product.productId})}"
+                       class="btn btn-warning btn-sm">Sửa</a>
+
+                    <a th:href="@{/admin/products/{id}/variants(id=${product.productId})}"
+                       class="btn btn-info btn-sm">Biến thể</a>
+
+                    <form th:if="${product.isActive}"
+                          th:action="@{/admin/products/deactivate/{id}(id=${product.productId})}"
+                          method="post"
+                          style="display:inline"
+                          onsubmit="return confirm('Bạn có chắc muốn ngừng kinh doanh sản phẩm này không?');">
+                        <button type="submit" class="btn btn-danger btn-sm">
+                            Ngừng kinh doanh
+                        </button>
+                    </form>
+                </td>
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(products)}">
+                <td colspan="6" class="text-center">Chưa có sản phẩm nào</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <a th:href="@{/admin/categories}" class="btn btn-secondary">
+        Quản lý danh mục
+    </a>
+</div>
+
+</body>
+</html>

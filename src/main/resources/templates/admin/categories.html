@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Quản lý danh mục')}"></head>
+<body>
+
+<div th:replace="~{fragments/admin-menu :: menu}"></div>
+
+<div class="container mt-4">
+    <h2>Quản lý danh mục</h2>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <a th:href="@{/admin/categories/add}" class="btn btn-primary mb-3">Thêm danh mục</a>
+
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Tên danh mục</th>
+            <th>Mô tả</th>
+            <th>Trạng thái</th>
+            <th>Thao tác</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="category : ${categories}">
+            <td th:text="${category.categoryId}"></td>
+            <td th:text="${category.categoryName}"></td>
+            <td th:text="${category.description}"></td>
+            <td th:text="${category.isActive ? 'Đang hoạt động' : 'Ngừng hoạt động'}"></td>
+            <td>
+                <a th:href="@{/admin/categories/edit/{id}(id=${category.categoryId})}"
+                   class="btn btn-warning btn-sm">Sửa</a>
+
+                <form th:action="@{/admin/categories/delete/{id}(id=${category.categoryId})}"
+                      method="post"
+                      style="display:inline"
+                      onsubmit="return confirm('Bạn có chắc muốn xóa danh mục này không?');">
+                    <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                </form>
+            </td>
+        </tr>
+
+        <tr th:if="${#lists.isEmpty(categories)}">
+            <td colspan="5" class="text-center">Chưa có danh mục nào</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
