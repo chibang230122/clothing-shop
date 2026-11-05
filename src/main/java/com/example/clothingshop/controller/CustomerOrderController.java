@@ -1,6 +1,8 @@
+
 package com.example.clothingshop.controller;
 
 import com.example.clothingshop.entity.ShopOrder;
+import com.example.clothingshop.repository.OrderItemRepository;
 import com.example.clothingshop.repository.ShopOrderRepository;
 
 import java.security.Principal;
@@ -16,29 +18,30 @@ import org.springframework.web.server.ResponseStatusException;
 public class CustomerOrderController {
 
     private final ShopOrderRepository orderRepository;
+    private final OrderItemRepository orderItemRepository;
 
     public CustomerOrderController(
-            ShopOrderRepository orderRepository) {
+            ShopOrderRepository orderRepository,
+            OrderItemRepository orderItemRepository) {
         this.orderRepository = orderRepository;
+        this.orderItemRepository = orderItemRepository;
     }
 
-    // Danh sách chỉ chứa đơn hàng của tài khoản hiện tại
     @GetMapping
     public String myOrders(
-            Principal principal, Model model) {
+            Principal principal,
+            Model model) {
 
         model.addAttribute(
                 "orders",
-                orderRepository
-                        .findByUser_EmailIgnoreCaseOrderByOrderDateDesc(
-                                principal.getName()
-                        )
+                orderRepository.findByUser_EmailIgnoreCaseOrderByOrderDateDesc(
+                        principal.getName()
+                )
         );
 
         return "account/orders";
     }
 
-    // Chỉ trả về đơn hàng về người dùng
     @GetMapping("/{id}")
     public String orderDetail(
             @PathVariable Long id,
@@ -47,7 +50,8 @@ public class CustomerOrderController {
 
         ShopOrder order = orderRepository
                 .findByOrderIdAndUser_EmailIgnoreCase(
-                        id, principal.getName()
+                        id,
+                        principal.getName()
                 )
                 .orElseThrow(() ->
                         new ResponseStatusException(
@@ -57,6 +61,11 @@ public class CustomerOrderController {
                 );
 
         model.addAttribute("order", order);
+
+        model.addAttribute(
+                "orderItems",
+                orderItemRepository.findByShopOrder_OrderId(id)
+        );
 
         return "account/order-detail";
     }

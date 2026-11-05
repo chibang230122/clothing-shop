@@ -1,0 +1,125 @@
+
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Quản lý đơn hàng')}"></head>
+<body>
+
+<div th:replace="~{fragments/bootstrap-menu :: menu}"></div>
+
+<main class="container py-4">
+
+    <h2 class="mb-4">Quản lý đơn hàng</h2>
+
+    <div th:if="${successMessage}"
+         class="alert alert-success"
+         th:text="${successMessage}">
+    </div>
+
+    <div th:if="${errorMessage}"
+         class="alert alert-danger"
+         th:text="${errorMessage}">
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+
+            <thead class="table-dark">
+            <tr>
+                <th>Mã đơn</th>
+                <th>Khách hàng</th>
+                <th>Người nhận</th>
+                <th>Số điện thoại</th>
+                <th>Ngày đặt</th>
+                <th>Tổng tiền</th>
+                <th>Trạng thái</th>
+                <th>Cập nhật</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            <tr th:each="order : ${orders}">
+
+                <td th:text="${order.orderCode}"></td>
+
+                <td th:text="${order.user.fullName}"></td>
+
+                <td th:text="${order.recipientName}"></td>
+
+                <td th:text="${order.recipientPhone}"></td>
+
+                <td th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}"></td>
+
+                <td th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+
+                <td>
+                    <span th:switch="${order.orderStatus}">
+                        <span th:case="'PENDING'" class="badge bg-warning text-dark">Chờ xác nhận</span>
+                        <span th:case="'CONFIRMED'" class="badge bg-info text-dark">Đã xác nhận</span>
+                        <span th:case="'PROCESSING'" class="badge bg-primary">Đang xử lý</span>
+                        <span th:case="'SHIPPING'" class="badge bg-secondary">Đang giao</span>
+                        <span th:case="'COMPLETED'" class="badge bg-success">Hoàn thành</span>
+                        <span th:case="'CANCELLED'" class="badge bg-danger">Đã hủy</span>
+                        <span th:case="*" class="badge bg-dark" th:text="${order.orderStatus}"></span>
+                    </span>
+                </td>
+
+                <td>
+                    <form th:if="${order.orderStatus == 'PENDING'}"
+                          th:action="@{/staff/orders/{id}/status(id=${order.orderId})}"
+                          method="post">
+                        <input type="hidden" name="status" value="CONFIRMED">
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            Xác nhận
+                        </button>
+                    </form>
+
+                    <form th:if="${order.orderStatus == 'CONFIRMED'}"
+                          th:action="@{/staff/orders/{id}/status(id=${order.orderId})}"
+                          method="post">
+                        <input type="hidden" name="status" value="PROCESSING">
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            Xử lý đơn
+                        </button>
+                    </form>
+
+                    <form th:if="${order.orderStatus == 'PROCESSING'}"
+                          th:action="@{/staff/orders/{id}/status(id=${order.orderId})}"
+                          method="post">
+                        <input type="hidden" name="status" value="SHIPPING">
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            Giao hàng
+                        </button>
+                    </form>
+
+                    <form th:if="${order.orderStatus == 'SHIPPING'}"
+                          th:action="@{/staff/orders/{id}/status(id=${order.orderId})}"
+                          method="post">
+                        <input type="hidden" name="status" value="COMPLETED">
+                        <button type="submit" class="btn btn-sm btn-success">
+                            Hoàn thành
+                        </button>
+                    </form>
+
+                    <span th:if="${order.orderStatus == 'COMPLETED' or order.orderStatus == 'CANCELLED'}">
+                        Không còn thao tác
+                    </span>
+                </td>
+
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(orders)}">
+                <td colspan="8" class="text-center">
+                    Chưa có đơn hàng nào
+                </td>
+            </tr>
+
+            </tbody>
+
+        </table>
+    </div>
+
+</main>
+
+</body>
+</html>

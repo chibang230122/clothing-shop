@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/header :: header('Chi tiết sản phẩm - Clothing Shop')}"></head>
@@ -17,7 +18,6 @@
         <div class="card-body p-4 p-md-5">
             <div class="row g-4">
 
-                <!-- HÌNH ẢNH -->
                 <div class="col-12 col-md-5">
                     <img th:if="${product.imageUrl != null and !#strings.isEmpty(product.imageUrl)}"
                          th:src="${product.imageUrl}"
@@ -32,10 +32,12 @@
                     </div>
                 </div>
 
-                <!-- THÔNG TIN SẢN PHẨM -->
                 <div class="col-12 col-md-7">
+
                     <h2 class="fw-bold mb-3"
-                        th:text="${product.productName}">Tên sản phẩm</h2>
+                        th:text="${product.productName}">
+                        Tên sản phẩm
+                    </h2>
 
                     <h3 class="text-danger fw-bold mb-4"
                         th:text="${#numbers.formatDecimal(product.basePrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">
@@ -63,6 +65,7 @@
                          th:if="${variants != null and !#lists.isEmpty(variants)}">
 
                         <table class="table table-bordered table-hover align-middle">
+
                             <thead class="table-dark">
                             <tr>
                                 <th>Size</th>
@@ -70,22 +73,59 @@
                                 <th>Mã SKU</th>
                                 <th>Tồn kho</th>
                                 <th>Trạng thái</th>
+                                <th>Thao tác</th>
                             </tr>
                             </thead>
 
                             <tbody>
                             <tr th:each="variant : ${variants}">
+
                                 <td th:text="${variant.size}">M</td>
+
                                 <td th:text="${variant.color}">Đen</td>
+
                                 <td th:text="${variant.sku}">AO001-M-DEN</td>
+
                                 <td th:text="${variant.stockQuantity}">10</td>
+
                                 <td>
                                     <span th:if="${variant.stockQuantity != null and variant.stockQuantity > 0}"
-                                          class="badge bg-success">Còn hàng</span>
+                                          class="badge bg-success">
+                                        Còn hàng
+                                    </span>
 
                                     <span th:unless="${variant.stockQuantity != null and variant.stockQuantity > 0}"
-                                          class="badge bg-danger">Hết hàng</span>
+                                          class="badge bg-danger">
+                                        Hết hàng
+                                    </span>
                                 </td>
+
+                                <td>
+                                    <form th:if="${variant.stockQuantity != null and variant.stockQuantity > 0}"
+                                          th:action="@{/cart/add}"
+                                          method="post">
+
+                                        <input type="hidden"
+                                               name="variantId"
+                                               th:value="${variant.variantId}">
+
+                                        <input type="hidden"
+                                               name="quantity"
+                                               value="1">
+
+                                        <button type="submit"
+                                                class="btn btn-dark btn-sm">
+                                            Thêm vào giỏ
+                                        </button>
+                                    </form>
+
+                                    <button th:unless="${variant.stockQuantity != null and variant.stockQuantity > 0}"
+                                            class="btn btn-secondary btn-sm"
+                                            disabled>
+                                        Hết hàng
+                                    </button>
+                                </td>
+
                             </tr>
                             </tbody>
                         </table>
@@ -95,6 +135,7 @@
                          th:if="${variants == null or #lists.isEmpty(variants)}">
                         Sản phẩm hiện chưa có biến thể đang hoạt động.
                     </div>
+
                 </div>
             </div>
         </div>

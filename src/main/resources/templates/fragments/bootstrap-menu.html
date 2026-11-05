@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="vi"
       xmlns:th="http://www.thymeleaf.org"
@@ -34,7 +35,13 @@
                     </a>
                 </li>
 
-                <!-- Chỉ Customer -->
+                <li class="nav-item"
+                    sec:authorize="hasRole('CUSTOMER')">
+                    <a class="nav-link" th:href="@{/cart}">
+                        Giỏ hàng
+                    </a>
+                </li>
+
                 <li class="nav-item"
                     sec:authorize="hasRole('CUSTOMER')">
                     <a class="nav-link"
@@ -43,7 +50,14 @@
                     </a>
                 </li>
 
-                <!-- Chỉ Admin -->
+                <li class="nav-item"
+                    sec:authorize="hasAnyRole('ADMIN','STAFF')">
+                    <a class="nav-link"
+                       th:href="@{/staff/orders}">
+                        Quản lý đơn hàng
+                    </a>
+                </li>
+
                 <li class="nav-item"
                     sec:authorize="hasRole('ADMIN')">
                     <a class="nav-link"
@@ -52,7 +66,6 @@
                     </a>
                 </li>
 
-                <!-- Người dùng đã đăng nhập -->
                 <li class="nav-item"
                     sec:authorize="isAuthenticated()">
                     <a class="nav-link"
@@ -65,7 +78,6 @@
                     <a class="nav-link" th:href="@{/account/change-password}">Đổi mật khẩu</a>
                 </li>
 
-                <!-- Chưa đăng nhập -->
                 <li class="nav-item"
                     sec:authorize="isAnonymous()">
                     <a class="nav-link" th:href="@{/login}">
@@ -81,7 +93,6 @@
                     </a>
                 </li>
 
-                <!-- Đăng xuất bằng POST -->
                 <li class="nav-item"
                     sec:authorize="isAuthenticated()">
 
