@@ -73,3 +73,19 @@ http://localhost:8081
 - Database phải được khởi động trước khi chạy ứng dụng.
 - Tên bảng và cột trong Entity phải khớp với database.
 - Dữ liệu mẫu cần được kiểm tra theo yêu cầu đồ án.
+
+## 9. Socket Server và Socket Client
+
+Khi website chạy, một Socket Server (TCP, cổng `9099`) chạy kèm để các chương trình client riêng hỏi **tồn kho** (`CHECK_STOCK`) và **trạng thái đơn hàng** (`GET_ORDER_STATUS`).
+
+- Giao thức, mã lỗi và thiết kế đa luồng: `docs/SOCKET_PROTOCOL.md`
+- Kịch bản demo 3 client: `docs/DEMO_SOCKET_3_CLIENTS.md`
+- Cấu hình: các khóa `shop.socket.*` trong `application.properties`. Token xác thực đặt qua biến môi trường `SHOP_SOCKET_AUTH_TOKEN`.
+
+Chạy nhanh:
+
+1. Chạy website (`ClothingShopApplication`), console sẽ có dòng `Socket server đang chạy tại 127.0.0.1:9099`.
+2. Build client: `cd socket-client && mvn package`.
+3. Gửi lệnh: `java -jar socket-client/target/shop-socket-client-1.0.0.jar CHECK_STOCK SKU-001-M-BLK`
+
+Chạy test: `mvnw test`. Các test trong `network/` không cần database; `InventorySocketConcurrencyTests` cần SQL Server như các test tích hợp khác.
