@@ -130,7 +130,7 @@
                             <div class="col-5 col-md-2 text-end">
 
                                 <p class="text-danger mb-2"
-                                   th:text="${#numbers.formatDecimal(item.productVariant.product.basePrice.multiply(T(java.math.BigDecimal).valueOf(item.quantity)), 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                   th:text="${#numbers.formatDecimal(item.productVariant.product.basePrice.multiply(new java.math.BigDecimal(item.quantity.toString())), 0, 'COMMA', 0, 'POINT')} + ' đ'">
                                     300.000 đ
                                 </p>
 
@@ -158,12 +158,10 @@
                 </div>
 
                 <div class="card-footer bg-white py-3">
-
                     <a th:href="@{/products}"
                        class="btn btn-outline-secondary">
                         Tiếp tục mua sắm
                     </a>
-
                 </div>
 
             </div>
@@ -194,16 +192,10 @@
                         </span>
                     </div>
 
-                    <!-- ĐÃ SỬA: Nút chuyển đến trang checkout -->
-
                     <a th:href="@{/checkout}"
                        class="btn btn-dark w-100">
                         Tiến hành thanh toán
                     </a>
-
-                    <p class="text-secondary small mt-3 mb-0">
-                        Kiểm tra thông tin và xác nhận đơn hàng của bạn.
-                    </p>
 
                 </div>
 

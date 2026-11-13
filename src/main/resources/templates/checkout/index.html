@@ -171,7 +171,7 @@
 
                         <div class="text-end">
 
-                            <span th:text="${#numbers.formatDecimal(item.productVariant.product.basePrice.multiply(T(java.math.BigDecimal).valueOf(item.quantity)), 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                            <span th:text="${#numbers.formatDecimal(item.productVariant.product.basePrice.multiply(new java.math.BigDecimal(item.quantity.toString())), 0, 'COMMA', 0, 'POINT')} + ' đ'">
                             </span>
 
                         </div>
