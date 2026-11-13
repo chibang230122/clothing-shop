@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Log va client build (thanh vien 5) ###
+logs/
+*.log
+socket-client/target/
