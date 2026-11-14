@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<button th:fragment="passwordToggle(inputId)" type="button"
+        class="btn btn-outline-secondary" data-password-toggle
+        th:attr="aria-controls=${inputId}" aria-label="Hiện mật khẩu">Hiện</button>
+
+<a th:fragment="identity(cssClass)" th:if="${signedInAccount != null}"
+   th:class="${cssClass}" th:href="@{/account/profile}"
+   th:text="|${signedInAccount.fullName} · ${signedInAccount.role}|">Hồ sơ</a>
+</body>
+</html>

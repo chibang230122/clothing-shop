@@ -1,6 +1,7 @@
 
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{fragments/header :: header('Chi tiết sản phẩm - Clothing Shop')}"></head>
 <body class="bg-light">
 
@@ -73,7 +74,7 @@
                                 <th>Mã SKU</th>
                                 <th>Tồn kho</th>
                                 <th>Trạng thái</th>
-                                <th>Thao tác</th>
+                                <th sec:authorize="isAnonymous() or hasRole('CUSTOMER')">Thao tác</th>
                             </tr>
                             </thead>
 
@@ -100,8 +101,13 @@
                                     </span>
                                 </td>
 
-                                <td>
-                                    <form th:if="${variant.stockQuantity != null and variant.stockQuantity > 0}"
+                                <td sec:authorize="isAnonymous() or hasRole('CUSTOMER')">
+                                    <a sec:authorize="isAnonymous()"
+                                       th:if="${variant.stockQuantity != null and variant.stockQuantity > 0}"
+                                       th:href="@{/login}" class="btn btn-outline-dark btn-sm">
+                                        Đăng nhập để mua
+                                    </a>
+                                    <form sec:authorize="hasRole('CUSTOMER')" th:if="${variant.stockQuantity != null and variant.stockQuantity > 0}"
                                           th:action="@{/cart/add}"
                                           method="post">
 

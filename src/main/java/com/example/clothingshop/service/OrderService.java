@@ -18,6 +18,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,6 +71,11 @@ public class OrderService {
         User user = userRepository.findByEmailIgnoreCase(email.trim())
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Không tìm thấy tài khoản khách hàng."));
+
+        if (!Boolean.TRUE.equals(user.getIsActive()) || user.getRole() == null
+                || !"CUSTOMER".equals(user.getRole().getRoleName())) {
+            throw new AccessDeniedException("Chỉ khách hàng đang hoạt động được đặt hàng.");
+        }
 
         Cart cart = cartRepository.findByUser_UserId(user.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException(

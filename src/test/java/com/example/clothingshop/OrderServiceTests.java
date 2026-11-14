@@ -12,6 +12,9 @@ import jakarta.persistence.LockModeType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.security.access.AccessDeniedException;
 
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -80,6 +83,9 @@ class OrderServiceTests {
         user.setEmail("customer@gmail.com");
         user.setFullName("Nguyen Van A");
         user.setIsActive(true);
+        Role role = new Role();
+        role.setRoleName("CUSTOMER");
+        user.setRole(role);
 
         cart = new Cart();
         cart.setCartId(1L);
@@ -332,6 +338,16 @@ class OrderServiceTests {
                 .findByEmailIgnoreCase(anyString());
 
         System.out.println("TEST 6 PASSED: Chan phuong thuc thanh toan sai");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"ADMIN", "STAFF"})
+    void checkoutRejectsNonCustomerBeforeTouchingCartOrOrders(String roleName) {
+        user.getRole().setRoleName(roleName);
+        when(userRepository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(user));
+
+        assertThrows(AccessDeniedException.class, () -> orderService.checkout(user.getEmail(), form));
+        verifyNoInteractions(cartRepository, cartItemRepository, shopOrderRepository, orderItemRepository);
     }
 
     // TEST 7: So luong khong hop le
