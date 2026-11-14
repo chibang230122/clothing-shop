@@ -2,9 +2,11 @@
 package com.example.clothingshop.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.DynamicUpdate;
 import java.time.LocalDateTime;
 
 @Entity
+@DynamicUpdate
 @Table(name = "Users")
 public class User {
 

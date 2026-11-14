@@ -40,20 +40,13 @@ public class AccountService {
 
         User user = getCurrentUser(email);
 
+        applyProfile(user, form);
+    }
+
+    static void applyProfile(User user, ProfileForm form) {
         user.setFullName(form.getFullName().trim());
-
-        user.setPhone(
-                form.getPhone() == null
-                        ? null : form.getPhone().trim()
-        );
-
-        user.setAddress(
-                form.getAddress() == null
-                        ? null : form.getAddress().trim()
-        );
-
-        // Không sửa Role, Email, PasswordHash, IsActive
-        userRepository.save(user);
+        user.setPhone(form.getPhone() == null ? null : form.getPhone().trim());
+        user.setAddress(form.getAddress() == null ? null : form.getAddress().trim());
     }
 
     @Transactional

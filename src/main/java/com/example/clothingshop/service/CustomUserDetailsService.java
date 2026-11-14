@@ -20,6 +20,11 @@ public class CustomUserDetailsService
         this.userRepository = userRepository;
     }
 
+    @Transactional(readOnly = true)
+    public boolean isActiveCustomer(String email) {
+        return userRepository.existsByEmailIgnoreCaseAndIsActiveTrueAndRole_RoleName(email, "CUSTOMER");
+    }
+
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String email)

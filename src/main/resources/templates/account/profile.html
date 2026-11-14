@@ -10,7 +10,7 @@
     <div class="card shadow-sm mx-auto" style="max-width:600px">
         <div class="card-body p-4">
 
-            <h3 class="mb-4">Hồ sơ cá nhân</h3>
+            <h3 class="mb-4">Chỉnh sửa hồ sơ</h3>
 
             <div th:if="${param.success != null}"
                  class="alert alert-success">
@@ -27,24 +27,24 @@
                 </div>
 
                 <div class="mb-3">
-                    <label>Họ và tên</label>
-                    <input th:field="*{fullName}"
+                    <label for="fullName" class="form-label">Họ và tên</label>
+                    <input th:field="*{fullName}" maxlength="100" autocomplete="name"
                            class="form-control" required>
                     <small th:errors="*{fullName}"
                            class="text-danger"></small>
                 </div>
 
                 <div class="mb-3">
-                    <label>Số điện thoại</label>
-                    <input th:field="*{phone}"
+                    <label for="phone" class="form-label">Số điện thoại</label>
+                    <input th:field="*{phone}" type="tel" maxlength="20" autocomplete="tel"
                            class="form-control">
                     <small th:errors="*{phone}"
                            class="text-danger"></small>
                 </div>
 
                 <div class="mb-3">
-                    <label>Địa chỉ</label>
-                    <textarea th:field="*{address}"
+                    <label for="address" class="form-label">Địa chỉ</label>
+                    <textarea th:field="*{address}" maxlength="300" autocomplete="street-address"
                               class="form-control" rows="3">
                     </textarea>
                     <small th:errors="*{address}"

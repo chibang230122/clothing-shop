@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.security.Principal;
 import java.util.List;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -121,6 +122,8 @@ public class CheckoutController {
             return "redirect:/account/orders/"
                     + order.getOrderId();
 
+        } catch (AccessDeniedException e) {
+            throw e;
         } catch (IllegalArgumentException e) {
 
             redirectAttributes.addFlashAttribute(

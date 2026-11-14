@@ -3,7 +3,9 @@ package com.example.clothingshop;
 import com.example.clothingshop.config.SecurityConfig;
 import com.example.clothingshop.controller.AuthController;
 import com.example.clothingshop.controller.CustomerOrderController;
+import com.example.clothingshop.repository.OrderItemRepository;
 import com.example.clothingshop.repository.ShopOrderRepository;
+import com.example.clothingshop.repository.UserRepository;
 import com.example.clothingshop.service.AuthService;
 import com.example.clothingshop.service.CustomUserDetailsService;
 
@@ -48,6 +50,12 @@ class SecurityWebTests {
 
     @MockitoBean
     private ShopOrderRepository orderRepository;
+
+    @MockitoBean
+    private OrderItemRepository orderItemRepository;
+
+    @MockitoBean
+    private UserRepository userRepository;
 
     @RestController
     static class TestEndpoints {

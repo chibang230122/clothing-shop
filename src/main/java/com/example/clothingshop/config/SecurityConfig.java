@@ -7,11 +7,17 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.authorization.AuthorizationDecision;
+import org.springframework.security.authorization.AuthorizationManagers;
+import org.springframework.security.authorization.AuthorityAuthorizationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 
 @Configuration
 public class SecurityConfig {
@@ -19,6 +25,16 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public SessionRegistry sessionRegistry() {
+        return new SessionRegistryImpl();
+    }
+
+    @Bean
+    public HttpSessionEventPublisher sessionEventPublisher() {
+        return new HttpSessionEventPublisher();
     }
 
     // Dung dung UserDetailsService doc tu SQL Server, ca trong kiem thu MVC.
@@ -33,19 +49,29 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(
-            HttpSecurity http, AuthenticationProvider authenticationProvider) throws Exception {
+            HttpSecurity http, AuthenticationProvider authenticationProvider,
+            CustomUserDetailsService userDetailsService, SessionRegistry sessions) throws Exception {
         http.authenticationProvider(authenticationProvider)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/products", "/products/**", "/login", "/register",
-                                "/access-denied", "/error", "/css/**", "/js/**",
+                                "/forgot-password", "/reset-password", "/access-denied",
+                                "/error", "/css/**", "/js/**",
                                 "/images/**", "/favicon.ico").permitAll()
                         .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
                         .requestMatchers("/staff", "/staff/**").hasAnyRole("ADMIN", "STAFF")
                         .requestMatchers("/account/orders", "/account/orders/**").hasRole("CUSTOMER")
-                        .requestMatchers("/account/**", "/cart/**", "/checkout/**", "/orders/**")
-                        .authenticated()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/cart", "/cart/**", "/checkout", "/checkout/**",
+                                "/orders", "/orders/**")
+                        .access(AuthorizationManagers.allOf(
+                                AuthorityAuthorizationManager.hasRole("CUSTOMER"),
+                                (authentication, context) -> new AuthorizationDecision(
+                                        userDetailsService.isActiveCustomer(authentication.get().getName()))
+                        ))
+                        .requestMatchers("/account/**").authenticated()
+                        .anyRequest().denyAll()
                 )
+                .sessionManagement(session -> session.maximumSessions(-1)
+                        .sessionRegistry(sessions).expiredUrl("/login?expired"))
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login")

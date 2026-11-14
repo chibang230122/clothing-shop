@@ -18,8 +18,12 @@
         <a sec:authorize="isAnonymous()"
            th:href="@{/register}">Đăng ký</a>
 
-        <a sec:authorize="isAuthenticated()"
-           th:href="@{/account/profile}">Hồ sơ</a>
+        <a th:replace="~{fragments/account-controls :: identity('')}"></a>
+
+        <a sec:authorize="hasRole('CUSTOMER')" th:href="@{/cart}">Giỏ hàng</a>
+
+        <a sec:authorize="hasAnyRole('ADMIN','STAFF')"
+           th:href="@{/staff/orders}">Quản lý đơn hàng</a>
 
         <a sec:authorize="isAuthenticated()"
            th:href="@{/account/change-password}">Đổi mật khẩu</a>

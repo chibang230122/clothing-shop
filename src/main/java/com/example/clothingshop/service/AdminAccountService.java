@@ -1,6 +1,9 @@
 package com.example.clothingshop.service;
 
+import com.example.clothingshop.dto.ProfileForm;
 import com.example.clothingshop.entity.Role;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import com.example.clothingshop.entity.User;
 import com.example.clothingshop.repository.RoleRepository;
 import com.example.clothingshop.repository.UserRepository;
@@ -30,6 +33,18 @@ public class AdminAccountService {
         String role = roleName == null || !FILTER_ROLES.contains(roleName) ? null : roleName;
         return users.searchAccounts(search, role,
                 PageRequest.of(Math.max(0, page), 10, Sort.by(Sort.Direction.DESC, "userId")));
+    }
+
+    @Transactional(readOnly = true)
+    public User getCustomer(Integer id) {
+        return users.findById(id)
+                .filter(user -> "CUSTOMER".equals(user.getRole().getRoleName()))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy khách hàng"));
+    }
+
+    @Transactional
+    public void updateCustomer(Integer id, ProfileForm form) {
+        AccountService.applyProfile(getCustomer(id), form);
     }
 
     @Transactional

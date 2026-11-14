@@ -58,6 +58,9 @@
                               th:text="${account.isActive ? 'Đang hoạt động' : 'Đã khóa'}"></span></td>
                     <td>
                         <div th:if="${account.role.roleName != 'ADMIN'}" class="d-flex flex-wrap gap-2">
+                            <a th:if="${account.role.roleName == 'CUSTOMER'}"
+                               th:href="@{/admin/accounts/{id}/edit(id=${account.userId})}"
+                               class="btn btn-sm btn-outline-secondary align-self-start text-nowrap">Chỉnh sửa thông tin</a>
                             <form th:action="@{/admin/accounts/{id}/role(id=${account.userId})}" method="post"
                                   class="d-flex gap-1">
                                 <select class="form-select form-select-sm" name="roleName" aria-label="Chọn vai trò">

@@ -2,6 +2,7 @@
 package com.example.clothingshop.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import com.example.clothingshop.entity.User;
@@ -17,6 +18,16 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByEmailIgnoreCase(String email);
 
     boolean existsByEmailIgnoreCase(String email);
+
+    boolean existsByEmailIgnoreCaseAndIsActiveTrueAndRole_RoleName(String email, String roleName);
+
+    @Modifying
+    @Query("""
+        update User u set u.passwordHash = :newHash
+        where u.userId = :userId and u.isActive = true and u.passwordHash = :oldHash
+        """)
+    int replacePassword(@Param("userId") Integer userId, @Param("oldHash") String oldHash,
+                        @Param("newHash") String newHash);
 
     @Query("""
     select u from User u join u.role r

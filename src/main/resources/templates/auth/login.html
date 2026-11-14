@@ -31,6 +31,14 @@
                 Đăng ký thành công. Hãy đăng nhập.
             </div>
 
+            <div th:if="${param.reset != null}" class="alert alert-success">
+                Đã đặt lại mật khẩu. Hãy đăng nhập bằng mật khẩu mới.
+            </div>
+
+            <div th:if="${param.expired != null}" class="alert alert-info">
+                Phiên đăng nhập đã hết hiệu lực. Vui lòng đăng nhập lại.
+            </div>
+
             <form th:action="@{/login}" method="post">
 
                 <div class="mb-3">
@@ -42,11 +50,14 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Mật khẩu</label>
-                    <input type="password" name="password"
-                           class="form-control"
-                           autocomplete="current-password"
-                           required>
+                    <label class="form-label" for="password">Mật khẩu</label>
+                    <div class="input-group">
+                        <input type="password" id="password" name="password"
+                               class="form-control"
+                               autocomplete="current-password"
+                               required>
+                        <button th:replace="~{fragments/account-controls :: passwordToggle('password')}"></button>
+                    </div>
                 </div>
 
                 <input type="hidden"
@@ -60,6 +71,10 @@
             </form>
 
             <p class="text-center mt-3 mb-0">
+                <a th:href="@{/forgot-password}">Quên mật khẩu?</a>
+            </p>
+
+            <p class="text-center mt-2 mb-0">
                 Chưa có tài khoản?
                 <a th:href="@{/register}">Đăng ký ngay</a>
             </p>

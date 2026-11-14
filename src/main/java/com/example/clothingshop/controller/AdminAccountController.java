@@ -1,6 +1,10 @@
 package com.example.clothingshop.controller;
 
+import com.example.clothingshop.dto.ProfileForm;
+import com.example.clothingshop.entity.User;
 import com.example.clothingshop.service.AdminAccountService;
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
 
 import java.security.Principal;
 
@@ -38,6 +42,28 @@ public class AdminAccountController {
         model.addAttribute("roleFilter", role);
 
         return "admin/accounts";
+    }
+
+    @GetMapping("/{id}/edit")
+    public String editCustomer(@PathVariable Integer id, Model model) {
+        User customer = accountService.getCustomer(id);
+        model.addAttribute("customerEmail", customer.getEmail());
+        model.addAttribute("customerId", id);
+        model.addAttribute("form", new ProfileForm(customer.getFullName(), customer.getPhone(), customer.getAddress()));
+        return "admin/customer-edit";
+    }
+
+    @PostMapping("/{id}/edit")
+    public String updateCustomer(@PathVariable Integer id, @Valid @ModelAttribute("form") ProfileForm form,
+                                 BindingResult errors, Model model, RedirectAttributes redirect) {
+        if (errors.hasErrors()) {
+            model.addAttribute("customerEmail", accountService.getCustomer(id).getEmail());
+            model.addAttribute("customerId", id);
+            return "admin/customer-edit";
+        }
+        accountService.updateCustomer(id, form);
+        redirect.addFlashAttribute("success", "Đã cập nhật thông tin khách hàng.");
+        return "redirect:/admin/accounts";
     }
 
     // 2. Khóa hoặc mở khóa tài khoản
