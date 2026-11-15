@@ -1,30 +1,75 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
 <body>
-<nav th:fragment="menu" class="navbar navbar-expand-lg navbar-dark admin-navbar sticky-top shadow-sm">
-    <div class="container-fluid px-3 px-lg-4">
-        <a class="navbar-brand fw-bold" th:href="@{/admin}">CLOTHING <span class="text-warning">ADMIN</span></a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNav">
+
+<nav th:fragment="menu"
+     class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+    <div class="container-fluid px-4">
+
+        <a class="navbar-brand fw-bold" th:href="@{/admin}">
+            CLOTHING <span class="text-warning">ADMIN</span>
+        </a>
+
+        <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#adminNavbarMenu"
+                aria-controls="adminNavbarMenu" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="adminNav">
-            <ul class="navbar-nav me-auto gap-lg-2">
-                <li class="nav-item"><a class="nav-link" th:href="@{/admin}">Tổng quan</a></li>
-                <li class="nav-item"><a class="nav-link" th:href="@{/admin/products}">Sản phẩm</a></li>
-                <li class="nav-item"><a class="nav-link" th:href="@{/admin/categories}">Danh mục</a></li>
-                <li class="nav-item"><a class="nav-link" th:href="@{/admin/accounts}">Tài khoản</a></li>
+
+        <div class="collapse navbar-collapse" id="adminNavbarMenu">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-lg-1">
+                <li class="nav-item">
+                    <a class="nav-link px-3"
+                       th:classappend="${currentPath == '/admin'} ? 'active bg-warning text-dark fw-bold rounded' : ''"
+                       th:href="@{/admin}">Tổng quan</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link px-3"
+                       th:classappend="${currentPath != null and #strings.startsWith(currentPath, '/admin/products')} ? 'active bg-warning text-dark fw-bold rounded' : ''"
+                       th:href="@{/admin/products}">Sản phẩm</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link px-3"
+                       th:classappend="${currentPath != null and #strings.startsWith(currentPath, '/admin/categories')} ? 'active bg-warning text-dark fw-bold rounded' : ''"
+                       th:href="@{/admin/categories}">Danh mục</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link px-3"
+                       th:classappend="${currentPath != null and #strings.startsWith(currentPath, '/admin/accounts')} ? 'active bg-warning text-dark fw-bold rounded' : ''"
+                       th:href="@{/admin/accounts}">Tài khoản</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link px-3"
+                       th:classappend="${currentPath != null and #strings.startsWith(currentPath, '/staff/orders')} ? 'active bg-warning text-dark fw-bold rounded' : ''"
+                       th:href="@{/staff/orders}">Quản lý đơn hàng</a>
+                </li>
             </ul>
-            <div class="d-flex flex-wrap align-items-center gap-3">
-                <a class="admin-toplink" th:href="@{/}">Về cửa hàng</a>
-                <a th:replace="~{fragments/account-controls :: identity('admin-toplink')}"></a>
-                <a class="admin-toplink" th:href="@{/account/change-password}">Đổi mật khẩu</a>
-                <form th:action="@{/logout}" method="post" class="m-0">
-                    <button class="btn btn-outline-light btn-sm" type="submit">Đăng xuất</button>
-                </form>
-            </div>
+
+            <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+                <li class="nav-item">
+                    <a class="nav-link px-3" th:href="@{/}">Về cửa hàng</a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <th:block th:replace="~{fragments/account-controls :: identity('nav-link px-3 text-info fw-semibold')}"></th:block>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link px-3"
+                       th:classappend="${currentPath == '/account/change-password'} ? 'active bg-warning text-dark fw-bold rounded' : ''"
+                       th:href="@{/account/change-password}">Đổi mật khẩu</a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <form th:action="@{/logout}" method="post" class="ms-lg-2 m-0">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <button class="btn btn-outline-light btn-sm" type="submit">Đăng xuất</button>
+                    </form>
+                </li>
+            </ul>
         </div>
     </div>
 </nav>
+
 </body>
 </html>
