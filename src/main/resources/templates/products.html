@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{fragments/header :: header('Danh sách sản phẩm - Clothing Shop')}"></head>
 <body class="bg-light">
 
@@ -166,10 +166,30 @@
                         Mô tả sản phẩm
                     </p>
 
-                    <a class="btn btn-dark w-100 mt-auto"
-                       th:href="@{/products/{id}(id=${product.productId})}">
-                        Xem chi tiết
-                    </a>
+                    <div class="mt-auto d-grid gap-2">
+                        <div class="row g-2" sec:authorize="!hasAnyRole('ADMIN', 'STAFF')">
+                            <div class="col-6">
+                                <form th:action="@{/cart/add}" method="post" class="m-0">
+                                    <input type="hidden" name="productId" th:value="${product.productId}">
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit" class="btn btn-outline-dark btn-sm w-100">
+                                        Thêm vào giỏ
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="col-6">
+                                <a class="btn btn-danger btn-sm w-100 fw-semibold"
+                                   th:href="@{/products/{id}(id=${product.productId}, buyNow=true)}">
+                                    Mua ngay
+                                </a>
+                            </div>
+                        </div>
+
+                        <a class="btn btn-dark btn-sm w-100"
+                           th:href="@{/products/{id}(id=${product.productId})}">
+                            Xem chi tiết
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

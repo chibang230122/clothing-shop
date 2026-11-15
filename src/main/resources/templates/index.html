@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,51 +21,13 @@
             color: #222;
         }
 
-        header {
-            background: #111;
-            color: white;
-            padding: 20px 7%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        header h1 {
-            font-size: 25px;
-        }
-
-        nav a {
-            color: white;
-            text-decoration: none;
-            margin-left: 22px;
-        }
-
-        nav a:hover {
-            color: #ddd;
-        }
-
-
-        .banner p {
-            color: #555;
-            margin-bottom: 22px;
-        }
-
-        .banner a {
-            display: inline-block;
-            background: #111;
-            color: white;
-            padding: 12px 24px;
-            text-decoration: none;
-            border-radius: 4px;
-        }
-
-
         .container-shop {
             padding: 40px 7%;
         }
 
         .container-shop h2 {
             margin-bottom: 25px;
+            font-weight: bold;
         }
 
         .product-list {
@@ -78,6 +42,8 @@
             overflow: hidden;
             box-shadow: 0 2px 8px #00000010;
             transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
         }
 
         .product:hover {
@@ -103,11 +69,15 @@
 
         .product-info {
             padding: 15px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
         }
 
         .product-info h3 {
             font-size: 17px;
             margin-bottom: 10px;
+            font-weight: bold;
         }
 
         .price {
@@ -136,6 +106,7 @@
 
         .detail-button:hover {
             background: #444;
+            color: white;
         }
 
         .empty {
@@ -161,19 +132,6 @@
         }
 
         @media (max-width: 550px) {
-            header {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            nav a {
-                margin: 0 7px;
-            }
-
-            .banner h2 {
-                font-size: 27px;
-            }
-
             .product-list {
                 grid-template-columns: 1fr;
             }
@@ -183,9 +141,9 @@
 
 <body>
 
-<div th:replace="~{fragments/menu :: menu}"></div>
+<div th:replace="~{fragments/bootstrap-menu :: menu}"></div>
 
-<div id="homeBannerCarousel" class="carousel slide position-relative" data-bs-interval="3000">
+<div id="homeBannerCarousel" class="carousel slide position-relative" data-bs-ride="carousel" data-bs-interval="3000">
     <div class="carousel-indicators">
         <button type="button" data-bs-target="#homeBannerCarousel" data-bs-slide-to="0" class="active"></button>
         <button type="button" data-bs-target="#homeBannerCarousel" data-bs-slide-to="1"></button>
@@ -232,11 +190,9 @@
 
         <article class="product" th:each="product : ${products}">
 
-            <img
-                    th:if="${product.imageUrl != null and !#strings.isEmpty(product.imageUrl)}"
-                    th:src="@{${product.imageUrl}}"
-                    th:alt="${product.productName}"
-            >
+            <img th:if="${product.imageUrl != null and !#strings.isEmpty(product.imageUrl)}"
+                 th:src="@{${product.imageUrl}}"
+                 th:alt="${product.productName}">
 
             <div class="product-img-empty"
                  th:unless="${product.imageUrl != null and !#strings.isEmpty(product.imageUrl)}">
@@ -244,9 +200,7 @@
             </div>
 
             <div class="product-info">
-                <h3 th:text="${product.productName}">
-                    Tên sản phẩm
-                </h3>
+                <h3 th:text="${product.productName}">Tên sản phẩm</h3>
 
                 <p class="price"
                    th:text="${#numbers.formatDecimal(product.basePrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">
@@ -259,10 +213,30 @@
                     Mô tả sản phẩm
                 </p>
 
-                <a class="detail-button"
-                   th:href="@{/products/{id}(id=${product.productId})}">
-                    Xem chi tiết
-                </a>
+                <div class="mt-auto pt-3 d-grid gap-2">
+                    <div class="row g-2" sec:authorize="!hasAnyRole('ADMIN', 'STAFF')">
+                        <div class="col-6">
+                            <form th:action="@{/cart/add}" method="post" class="m-0">
+                                <input type="hidden" name="productId" th:value="${product.productId}">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="btn btn-outline-dark btn-sm w-100">
+                                    Thêm vào giỏ
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col-6">
+                            <a class="btn btn-danger btn-sm w-100 fw-semibold"
+                               th:href="@{/products/{id}(id=${product.productId}, buyNow=true)}">
+                                Mua ngay
+                            </a>
+                        </div>
+                    </div>
+
+                    <a class="btn btn-dark btn-sm w-100"
+                       th:href="@{/products/{id}(id=${product.productId})}">
+                        Xem chi tiết
+                    </a>
+                </div>
             </div>
 
         </article>

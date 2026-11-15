@@ -44,12 +44,30 @@
     </div>
     <h4 class="fw-semibold mb-3">Quản lý nhanh</h4>
     <div class="row g-3">
-        <div class="col-md-4"><a class="admin-quick" th:href="@{/admin/accounts}"><span class="h5 d-block">Quản lý tài khoản</span><small>Tra
-            cứu, khóa/mở khóa và phân vai trò Customer/Staff</small></a></div>
-        <div class="col-md-4"><a class="admin-quick" th:href="@{/admin/products}"><span class="h5 d-block">Quản lý sản phẩm</span><small>Xem,
-            thêm, cập nhật sản phẩm và biến thể</small></a></div>
-        <div class="col-md-4"><a class="admin-quick" th:href="@{/admin/categories}"><span class="h5 d-block">Quản lý danh mục</span><small>Thêm,
-            chỉnh sửa và quản lý danh mục</small></a></div>
+        <div class="col-md-6 col-lg-3">
+            <a class="admin-quick" th:href="@{/admin/accounts}">
+                <span class="h5 d-block">Quản lý tài khoản</span>
+                <small>Tra cứu, khóa/mở khóa và phân vai trò Customer/Staff</small>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a class="admin-quick" th:href="@{/admin/products}">
+                <span class="h5 d-block">Quản lý sản phẩm</span>
+                <small>Xem, thêm, cập nhật sản phẩm và biến thể</small>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a class="admin-quick" th:href="@{/admin/categories}">
+                <span class="h5 d-block">Quản lý danh mục</span>
+                <small>Thêm, chỉnh sửa và quản lý danh mục</small>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a class="admin-quick" th:href="@{/staff/orders}">
+                <span class="h5 d-block">Quản lý đơn hàng</span>
+                <small>Xem danh sách, chi tiết và xử lý trạng thái đơn hàng</small>
+            </a>
+        </div>
     </div>
 </main>
 </body>
