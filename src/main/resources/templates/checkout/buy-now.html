@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Mua ngay')}"></head>
+<body>
+<div th:replace="~{fragments/bootstrap-menu :: menu}"></div>
+<main class="container py-4">
+    <h2 class="mb-4">Mua ngay</h2>
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 th:text="${variant.product.productName}"></h5>
+            <p class="mb-1">Size: <span th:text="${variant.size}"></span> | Màu: <span th:text="${variant.color}"></span></p>
+            <p class="mb-1">Số lượng: <span th:text="${quantity}"></span></p>
+            <p class="fw-bold text-danger">Tổng tiền:
+                <span th:text="${#numbers.formatDecimal(totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+            </p>
+        </div>
+    </div>
+    <form th:action="@{/checkout/buy-now/{id}(id=${variant.variantId})}" method="post" th:object="${checkoutForm}" class="card">
+        <input type="hidden" name="quantity" th:value="${quantity}">
+        <div class="card-body">
+            <div class="mb-3">
+                <label class="form-label">Tên người nhận</label>
+                <input class="form-control" th:field="*{recipientName}" required maxlength="100">
+                <small class="text-danger" th:errors="*{recipientName}"></small>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Số điện thoại</label>
+                <input class="form-control" th:field="*{recipientPhone}" required>
+                <small class="text-danger" th:errors="*{recipientPhone}"></small>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Địa chỉ giao hàng</label>
+                <textarea class="form-control" th:field="*{shippingAddress}" required maxlength="300"></textarea>
+                <small class="text-danger" th:errors="*{shippingAddress}"></small>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Phương thức thanh toán</label>
+                <select class="form-select" th:field="*{paymentMethod}">
+                    <option value="COD">Thanh toán khi nhận hàng (COD)</option>
+                    <option value="BANK_TRANSFER">Chuyển khoản</option>
+                    <option value="E_WALLET">Ví điện tử</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Ghi chú</label>
+                <textarea class="form-control" th:field="*{note}" maxlength="500"></textarea>
+            </div>
+            <button type="submit" class="btn btn-danger">Đặt mua ngay</button>
+            <a th:href="@{/products/{id}(id=${variant.product.productId})}" class="btn btn-outline-secondary">Quay lại sản phẩm</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>

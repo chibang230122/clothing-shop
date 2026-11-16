@@ -107,23 +107,17 @@
                                        th:href="@{/login}" class="btn btn-outline-dark btn-sm">
                                         Đăng nhập để mua
                                     </a>
-                                    <form sec:authorize="hasRole('CUSTOMER')" th:if="${variant.stockQuantity != null and variant.stockQuantity > 0}"
-                                          th:action="@{/cart/add}"
-                                          method="post">
-
-                                        <input type="hidden"
-                                               name="variantId"
-                                               th:value="${variant.variantId}">
-
-                                        <input type="hidden"
-                                               name="quantity"
-                                               value="1">
-
-                                        <button type="submit"
-                                                class="btn btn-dark btn-sm">
-                                            Thêm vào giỏ
-                                        </button>
-                                    </form>
+                                    <div sec:authorize="hasRole('CUSTOMER')" class="d-flex flex-wrap gap-2">
+                                        <form th:action="@{/cart/add}" method="post">
+                                            <input type="hidden" name="variantId" th:value="${variant.variantId}">
+                                            <input type="hidden" name="quantity" value="1">
+                                            <button type="submit" class="btn btn-outline-dark btn-sm">Thêm vào giỏ</button>
+                                        </form>
+                                        <form th:action="@{/checkout/buy-now/{id}(id=${variant.variantId})}" method="get">
+                                            <input type="hidden" name="quantity" value="1">
+                                            <button type="submit" class="btn btn-danger btn-sm">Mua ngay</button>
+                                        </form>
+                                    </div>
 
                                     <button th:unless="${variant.stockQuantity != null and variant.stockQuantity > 0}"
                                             class="btn btn-secondary btn-sm"

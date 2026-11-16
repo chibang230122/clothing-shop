@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Chi tiết đơn hàng')}"></head>
+<body>
+<div th:replace="~{fragments/bootstrap-menu :: menu}"></div>
+<main class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Chi tiết đơn hàng</h2>
+        <a th:href="@{/staff/orders}" class="btn btn-outline-secondary">Quay lại danh sách</a>
+    </div>
+    <div class="card mb-3"><div class="card-body">
+        <h5 th:text="'Mã đơn: ' + ${order.orderCode}"></h5>
+        <div class="row">
+            <div class="col-md-6">
+                <p>Khách hàng: <span th:text="${order.user.fullName}"></span></p>
+                <p>Email: <span th:text="${order.user.email}"></span></p>
+                <p>Người nhận: <span th:text="${order.recipientName}"></span></p>
+                <p>Số điện thoại: <span th:text="${order.recipientPhone}"></span></p>
+            </div>
+            <div class="col-md-6">
+                <p>Ngày đặt: <span th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}"></span></p>
+                <p>Địa chỉ: <span th:text="${order.shippingAddress}"></span></p>
+                <p>Trạng thái: <strong th:text="${order.orderStatus}"></strong></p>
+                <p>Thanh toán: <span th:text="${order.paymentMethod + ' / ' + order.paymentStatus}"></span></p>
+            </div>
+        </div>
+        <p>Ghi chú: <span th:text="${order.note == null or order.note.isBlank() ? 'Không có' : order.note}"></span></p>
+    </div></div>
+    <div class="card"><div class="card-body">
+        <h5>Sản phẩm trong đơn</h5>
+        <div class="table-responsive"><table class="table table-bordered">
+            <thead><tr><th>Sản phẩm</th><th>Size</th><th>Màu</th><th>Đơn giá</th><th>SL</th><th>Thành tiền</th></tr></thead>
+            <tbody><tr th:each="item : ${orderItems}">
+                <td th:text="${item.productVariant.product.productName}"></td>
+                <td th:text="${item.productVariant.size}"></td><td th:text="${item.productVariant.color}"></td>
+                <td th:text="${#numbers.formatDecimal(item.unitPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                <td th:text="${item.quantity}"></td>
+                <td th:text="${#numbers.formatDecimal(item.lineTotal, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+            </tr></tbody>
+        </table></div>
+        <div class="text-end">
+            <p>Tạm tính: <span th:text="${#numbers.formatDecimal(order.subtotal, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span></p>
+            <p>Phí vận chuyển: <span th:text="${#numbers.formatDecimal(order.shippingFee, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span></p>
+            <h5>Tổng cộng: <span class="text-danger" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span></h5>
+        </div>
+    </div></div>
+</main>
+</body>
+</html>

@@ -43,6 +43,11 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link px-3"
+                       th:classappend="${currentPath != null and #strings.startsWith(currentPath, '/staff/dashboard')} ? 'active bg-warning text-dark fw-bold rounded' : ''"
+                       th:href="@{/staff/dashboard}">Dashboard Staff</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link px-3"
                        th:classappend="${currentPath != null and #strings.startsWith(currentPath, '/staff/orders')} ? 'active bg-warning text-dark fw-bold rounded' : ''"
                        th:href="@{/staff/orders}">Quản lý đơn hàng</a>
                 </li>

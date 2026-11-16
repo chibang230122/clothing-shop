@@ -3,6 +3,7 @@ package com.example.clothingshop.controller;
 
 import com.example.clothingshop.service.OrderCancellationService;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -38,9 +39,19 @@ public class OrderCancellationController {
 
         } catch (Exception e) {
 
+            String message;
+            if (e instanceof ResponseStatusException responseException
+                    && responseException.getReason() != null) {
+                message = responseException.getReason();
+            } else {
+                message = e.getMessage();
+            }
+            if (message == null || message.isBlank()) {
+                message = "Hủy đơn hàng thất bại. Vui lòng tải lại trang và thử lại.";
+            }
             redirectAttributes.addFlashAttribute(
                     "errorMessage",
-                    e.getMessage()
+                    message
             );
         }
 

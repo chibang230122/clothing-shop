@@ -1,4 +1,5 @@
-NOTE: Chưa có nút huỷ đơn hàng ở src/main/resources/templates/account/order-detail.html
+Các phần bổ sung cho Deadline 2 được ghi riêng trong file ThanhVien4_Deadline2.md.
+
 1.CartService.java
 Lấy danh sách sản phẩm trong giỏ.
 Thêm sản phẩm vào giỏ.
