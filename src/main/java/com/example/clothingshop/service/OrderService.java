@@ -214,6 +214,74 @@ public class OrderService {
         return order;
     }
 
+    @Transactional
+    public ShopOrder checkoutNow(String email, Integer variantId, Integer quantity, CheckoutForm form) {
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Không xác định được tài khoản người dùng.");
+        }
+        if (variantId == null || quantity == null || quantity <= 0 || quantity > 99) {
+            throw new IllegalArgumentException("Sản phẩm hoặc số lượng mua không hợp lệ.");
+        }
+        if (form == null) {
+            throw new IllegalArgumentException("Thông tin đặt hàng không hợp lệ.");
+        }
+        validateCheckoutForm(form);
+
+        User user = userRepository.findByEmailIgnoreCase(email.trim())
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tài khoản khách hàng."));
+        if (!Boolean.TRUE.equals(user.getIsActive()) || user.getRole() == null
+                || !"CUSTOMER".equals(user.getRole().getRoleName())) {
+            throw new AccessDeniedException("Chỉ khách hàng đang hoạt động được đặt hàng.");
+        }
+
+        ProductVariant variant = entityManager.find(
+                ProductVariant.class, variantId, LockModeType.PESSIMISTIC_WRITE);
+        if (variant == null || !Boolean.TRUE.equals(variant.getIsActive())
+                || !Boolean.TRUE.equals(variant.getProduct().getIsActive())) {
+            throw new IllegalArgumentException("Sản phẩm không còn kinh doanh.");
+        }
+        entityManager.refresh(variant, LockModeType.PESSIMISTIC_WRITE);
+        Integer stock = variant.getStockQuantity();
+        if (stock == null || stock < quantity) {
+            throw new IllegalArgumentException("Sản phẩm không đủ tồn kho. Còn lại: "
+                    + (stock == null ? 0 : stock));
+        }
+
+        BigDecimal unitPrice = variant.getProduct().getBasePrice();
+        if (unitPrice == null || unitPrice.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Giá sản phẩm không hợp lệ.");
+        }
+
+        ShopOrder order = new ShopOrder();
+        order.setUser(user);
+        order.setOrderCode(generateOrderCode());
+        order.setOrderDate(LocalDateTime.now());
+        order.setRecipientName(form.getRecipientName().trim());
+        order.setRecipientPhone(form.getRecipientPhone().trim());
+        order.setShippingAddress(form.getShippingAddress().trim());
+        order.setOrderStatus("PENDING");
+        order.setPaymentMethod(form.getPaymentMethod());
+        order.setPaymentStatus("UNPAID");
+        order.setNote(form.getNote() == null || form.getNote().isBlank() ? null : form.getNote().trim());
+
+        BigDecimal lineTotal = unitPrice.multiply(BigDecimal.valueOf(quantity));
+        order.setSubtotal(lineTotal);
+        order.setShippingFee(BigDecimal.ZERO);
+        order.setTotalAmount(lineTotal);
+        order = shopOrderRepository.saveAndFlush(order);
+
+        OrderItem item = new OrderItem();
+        item.setShopOrder(order);
+        item.setProductVariant(variant);
+        item.setQuantity(quantity);
+        item.setUnitPrice(unitPrice);
+        item.setLineTotal(lineTotal);
+        orderItemRepository.save(item);
+
+        variant.setStockQuantity(stock - quantity);
+        return order;
+    }
+
     private void validateCheckoutForm(CheckoutForm form) {
 
         if (form.getRecipientName() == null

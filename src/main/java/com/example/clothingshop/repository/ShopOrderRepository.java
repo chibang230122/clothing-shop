@@ -1,7 +1,8 @@
-
 package com.example.clothingshop.repository;
 
 import com.example.clothingshop.entity.ShopOrder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,9 +30,30 @@ public interface ShopOrderRepository extends JpaRepository<ShopOrder, Long> {
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate
     );
-    List<ShopOrder> findByUser_EmailIgnoreCaseOrderByOrderDateDesc(
-            String email);
 
-    java.util.Optional<ShopOrder> findByOrderIdAndUser_EmailIgnoreCase(
-            Long orderId, String email);
+    List<ShopOrder> findByUser_EmailIgnoreCaseOrderByOrderDateDesc(String email);
+
+    java.util.Optional<ShopOrder> findByOrderIdAndUser_EmailIgnoreCase(Long orderId, String email);
+
+    @Query("""
+        SELECT o FROM ShopOrder o
+        JOIN o.user u
+        WHERE (:keyword IS NULL OR :keyword = ''
+            OR LOWER(o.orderCode) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR o.recipientPhone LIKE CONCAT('%', :keyword, '%'))
+          AND (:status IS NULL OR :status = '' OR o.orderStatus = :status)
+          AND (:fromDate IS NULL OR o.orderDate >= :fromDate)
+          AND (:toDate IS NULL OR o.orderDate < :toDate)
+        """)
+    Page<ShopOrder> searchStaffOrders(
+            @Param("keyword") String keyword,
+            @Param("status") String status,
+            @Param("fromDate") LocalDateTime fromDate,
+            @Param("toDate") LocalDateTime toDate,
+            Pageable pageable
+    );
+
+    long countByOrderStatus(String orderStatus);
 }

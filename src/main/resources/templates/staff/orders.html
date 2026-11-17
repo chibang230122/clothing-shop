@@ -1,125 +1,102 @@
-
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/header :: header('Quản lý đơn hàng')}"></head>
 <body>
-
 <div th:replace="~{fragments/bootstrap-menu :: menu}"></div>
-
 <main class="container py-4">
-
-    <h2 class="mb-4">Quản lý đơn hàng</h2>
-
-    <div th:if="${successMessage}"
-         class="alert alert-success"
-         th:text="${successMessage}">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Quản lý đơn hàng</h2>
+        <a th:href="@{/staff/dashboard}" class="btn btn-outline-primary">Dashboard Staff</a>
     </div>
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+    <div th:if="${dateError}" class="alert alert-warning" th:text="${dateError}"></div>
 
-    <div th:if="${errorMessage}"
-         class="alert alert-danger"
-         th:text="${errorMessage}">
-    </div>
+    <form method="get" th:action="@{/staff/orders}" class="card card-body mb-3">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Tìm kiếm</label>
+                <input class="form-control" name="keyword" th:value="${keyword}" placeholder="Mã đơn, tên khách, email, SĐT">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Trạng thái</label>
+                <select class="form-select" name="status">
+                    <option value="">Tất cả</option>
+                    <option value="PENDING" th:selected="${status == 'PENDING'}">Chờ xác nhận</option>
+                    <option value="CONFIRMED" th:selected="${status == 'CONFIRMED'}">Đã xác nhận</option>
+                    <option value="PROCESSING" th:selected="${status == 'PROCESSING'}">Đang xử lý</option>
+                    <option value="SHIPPING" th:selected="${status == 'SHIPPING'}">Đang giao</option>
+                    <option value="COMPLETED" th:selected="${status == 'COMPLETED'}">Hoàn thành</option>
+                    <option value="CANCELLED" th:selected="${status == 'CANCELLED'}">Đã hủy</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Từ ngày</label>
+                <input type="date" class="form-control" name="fromDate" th:value="${fromDate}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Đến ngày</label>
+                <input type="date" class="form-control" name="toDate" th:value="${toDate}">
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button class="btn btn-primary" type="submit">Lọc</button>
+                <a class="btn btn-outline-secondary" th:href="@{/staff/orders}">Xóa lọc</a>
+            </div>
+        </div>
+    </form>
 
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle">
-
             <thead class="table-dark">
-            <tr>
-                <th>Mã đơn</th>
-                <th>Khách hàng</th>
-                <th>Người nhận</th>
-                <th>Số điện thoại</th>
-                <th>Ngày đặt</th>
-                <th>Tổng tiền</th>
-                <th>Trạng thái</th>
-                <th>Cập nhật</th>
-            </tr>
+            <tr><th>Mã đơn</th><th>Khách hàng</th><th>Người nhận</th><th>SĐT</th><th>Ngày đặt</th><th>Tổng tiền</th><th>Trạng thái</th><th>Thao tác</th></tr>
             </thead>
-
             <tbody>
-
-            <tr th:each="order : ${orders}">
-
+            <tr th:each="order : ${orders.content}">
                 <td th:text="${order.orderCode}"></td>
-
-                <td th:text="${order.user.fullName}"></td>
-
+                <td>
+                    <div th:text="${order.user.fullName}"></div>
+                    <small class="text-muted" th:text="${order.user.email}"></small>
+                </td>
                 <td th:text="${order.recipientName}"></td>
-
                 <td th:text="${order.recipientPhone}"></td>
-
                 <td th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}"></td>
-
                 <td th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
-
+                <td th:text="${order.orderStatus}"></td>
                 <td>
-                    <span th:switch="${order.orderStatus}">
-                        <span th:case="'PENDING'" class="badge bg-warning text-dark">Chờ xác nhận</span>
-                        <span th:case="'CONFIRMED'" class="badge bg-info text-dark">Đã xác nhận</span>
-                        <span th:case="'PROCESSING'" class="badge bg-primary">Đang xử lý</span>
-                        <span th:case="'SHIPPING'" class="badge bg-secondary">Đang giao</span>
-                        <span th:case="'COMPLETED'" class="badge bg-success">Hoàn thành</span>
-                        <span th:case="'CANCELLED'" class="badge bg-danger">Đã hủy</span>
-                        <span th:case="*" class="badge bg-dark" th:text="${order.orderStatus}"></span>
-                    </span>
-                </td>
-
-                <td>
-                    <form th:if="${order.orderStatus == 'PENDING'}"
-                          th:action="@{/staff/orders/{id}/status(id=${order.orderId})}"
-                          method="post">
-                        <input type="hidden" name="status" value="CONFIRMED">
-                        <button type="submit" class="btn btn-sm btn-primary">
-                            Xác nhận
-                        </button>
+                    <a class="btn btn-sm btn-outline-info mb-1" th:href="@{/staff/orders/{id}(id=${order.orderId})}">Chi tiết</a>
+                    <form th:if="${order.orderStatus == 'PENDING'}" th:action="@{/staff/orders/{id}/status(id=${order.orderId})}" method="post">
+                        <input type="hidden" name="status" value="CONFIRMED"><button class="btn btn-sm btn-primary">Xác nhận</button>
                     </form>
-
-                    <form th:if="${order.orderStatus == 'CONFIRMED'}"
-                          th:action="@{/staff/orders/{id}/status(id=${order.orderId})}"
-                          method="post">
-                        <input type="hidden" name="status" value="PROCESSING">
-                        <button type="submit" class="btn btn-sm btn-primary">
-                            Xử lý đơn
-                        </button>
+                    <form th:if="${order.orderStatus == 'CONFIRMED'}" th:action="@{/staff/orders/{id}/status(id=${order.orderId})}" method="post">
+                        <input type="hidden" name="status" value="PROCESSING"><button class="btn btn-sm btn-primary">Xử lý đơn</button>
                     </form>
-
-                    <form th:if="${order.orderStatus == 'PROCESSING'}"
-                          th:action="@{/staff/orders/{id}/status(id=${order.orderId})}"
-                          method="post">
-                        <input type="hidden" name="status" value="SHIPPING">
-                        <button type="submit" class="btn btn-sm btn-primary">
-                            Giao hàng
-                        </button>
+                    <form th:if="${order.orderStatus == 'PROCESSING'}" th:action="@{/staff/orders/{id}/status(id=${order.orderId})}" method="post">
+                        <input type="hidden" name="status" value="SHIPPING"><button class="btn btn-sm btn-primary">Giao hàng</button>
                     </form>
-
-                    <form th:if="${order.orderStatus == 'SHIPPING'}"
-                          th:action="@{/staff/orders/{id}/status(id=${order.orderId})}"
-                          method="post">
-                        <input type="hidden" name="status" value="COMPLETED">
-                        <button type="submit" class="btn btn-sm btn-success">
-                            Hoàn thành
-                        </button>
+                    <form th:if="${order.orderStatus == 'SHIPPING'}" th:action="@{/staff/orders/{id}/status(id=${order.orderId})}" method="post">
+                        <input type="hidden" name="status" value="COMPLETED"><button class="btn btn-sm btn-success">Hoàn thành</button>
                     </form>
-
-                    <span th:if="${order.orderStatus == 'COMPLETED' or order.orderStatus == 'CANCELLED'}">
-                        Không còn thao tác
-                    </span>
-                </td>
-
-            </tr>
-
-            <tr th:if="${#lists.isEmpty(orders)}">
-                <td colspan="8" class="text-center">
-                    Chưa có đơn hàng nào
                 </td>
             </tr>
-
+            <tr th:if="${orders.totalElements == 0}"><td colspan="8" class="text-center">Không tìm thấy đơn hàng.</td></tr>
             </tbody>
-
         </table>
     </div>
 
+    <nav th:if="${orders.totalPages > 1}" aria-label="Phân trang đơn hàng">
+        <ul class="pagination justify-content-center">
+            <li class="page-item" th:classappend="${orders.first} ? 'disabled'">
+                <a class="page-link" th:href="@{/staff/orders(page=${orders.number - 1},keyword=${keyword},status=${status},fromDate=${fromDate},toDate=${toDate})}">Trước</a>
+            </li>
+            <li class="page-item" th:each="p : ${#numbers.sequence(0, orders.totalPages - 1)}" th:classappend="${p == orders.number} ? 'active'">
+                <a class="page-link" th:text="${p + 1}" th:href="@{/staff/orders(page=${p},keyword=${keyword},status=${status},fromDate=${fromDate},toDate=${toDate})}"></a>
+            </li>
+            <li class="page-item" th:classappend="${orders.last} ? 'disabled'">
+                <a class="page-link" th:href="@{/staff/orders(page=${orders.number + 1},keyword=${keyword},status=${status},fromDate=${fromDate},toDate=${toDate})}">Sau</a>
+            </li>
+        </ul>
+    </nav>
+    <p class="text-center text-muted" th:text="'Tổng ' + ${orders.totalElements} + ' đơn hàng'"></p>
 </main>
-
 </body>
 </html>

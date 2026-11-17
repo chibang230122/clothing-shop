@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Dashboard Staff')}"></head>
+<body>
+<div th:replace="~{fragments/bootstrap-menu :: menu}"></div>
+<main class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Dashboard nhân viên</h2>
+        <a th:href="@{/staff/orders}" class="btn btn-primary">Quản lý đơn hàng</a>
+    </div>
+    <div class="row g-3">
+        <div class="col-6 col-lg-4"><div class="card h-100 border-primary"><div class="card-body"><p class="text-muted">Tổng đơn hàng</p><h2 th:text="${totalOrders}"></h2></div></div></div>
+        <div class="col-6 col-lg-4"><div class="card h-100 border-warning"><div class="card-body"><p class="text-muted">Chờ xác nhận</p><h2 th:text="${pendingOrders}"></h2></div></div></div>
+        <div class="col-6 col-lg-4"><div class="card h-100 border-info"><div class="card-body"><p class="text-muted">Đã xác nhận</p><h2 th:text="${confirmedOrders}"></h2></div></div></div>
+        <div class="col-6 col-lg-4"><div class="card h-100 border-primary"><div class="card-body"><p class="text-muted">Đang xử lý</p><h2 th:text="${processingOrders}"></h2></div></div></div>
+        <div class="col-6 col-lg-4"><div class="card h-100 border-secondary"><div class="card-body"><p class="text-muted">Đang giao</p><h2 th:text="${shippingOrders}"></h2></div></div></div>
+        <div class="col-6 col-lg-4"><div class="card h-100 border-success"><div class="card-body"><p class="text-muted">Hoàn thành</p><h2 th:text="${completedOrders}"></h2></div></div></div>
+        <div class="col-6 col-lg-4"><div class="card h-100 border-danger"><div class="card-body"><p class="text-muted">Đã hủy</p><h2 th:text="${cancelledOrders}"></h2></div></div></div>
+    </div>
+</main>
+</body>
+</html>
