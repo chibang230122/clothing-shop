@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.Optional;
+import java.util.List;
 
 @Controller
 @RequestMapping("/products")
@@ -41,6 +42,12 @@ public class ProductDetailController {
                 "variants",
                 productVariantRepository.findByProduct_ProductIdAndIsActiveTrue(id)
         );
+        List<Product> recommendedProducts = productRepository.findByIsActiveTrue()
+                .stream()
+                .filter(item -> !item.getProductId().equals(id))
+                .limit(4)
+                .toList();
+        model.addAttribute("recommendedProducts", recommendedProducts);
 
         return "product-detail";
     }

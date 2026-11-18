@@ -55,5 +55,22 @@ public interface ShopOrderRepository extends JpaRepository<ShopOrder, Long> {
             Pageable pageable
     );
 
+    @Query("""
+        SELECT YEAR(o.orderDate) AS revenueYear,
+               MONTH(o.orderDate) AS revenueMonth,
+               COALESCE(SUM(o.totalAmount), 0) AS revenueAmount
+        FROM ShopOrder o
+        WHERE o.orderStatus = 'COMPLETED'
+        GROUP BY YEAR(o.orderDate), MONTH(o.orderDate)
+        ORDER BY YEAR(o.orderDate) DESC, MONTH(o.orderDate) DESC
+        """)
+    List<MonthlyRevenueView> findMonthlyRevenueHistory();
+
+    interface MonthlyRevenueView {
+        Integer getRevenueYear();
+        Integer getRevenueMonth();
+        BigDecimal getRevenueAmount();
+    }
+
     long countByOrderStatus(String orderStatus);
 }

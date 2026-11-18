@@ -7,6 +7,7 @@ import com.example.clothingshop.service.CartService;
 import java.math.BigDecimal;
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -79,6 +80,47 @@ public class CartController {
         }
 
         return "redirect:/cart";
+    }
+
+    @PostMapping("/add-ajax")
+    @ResponseBody
+    public Map<String, Object> addToCartAjax(
+            @RequestParam(required = false) Integer productId,
+            @RequestParam(required = false) Integer variantId,
+            @RequestParam(defaultValue = "1") Integer quantity,
+            Principal principal) {
+
+        try {
+            if (productId != null) {
+                cartService.addProductItem(principal.getName(), productId, quantity);
+            } else {
+                cartService.addItem(principal.getName(), variantId, quantity);
+            }
+
+            return Map.of(
+                    "success", true,
+                    "message", "Đã thêm sản phẩm vào giỏ hàng.",
+                    "count", getCartCount(principal.getName())
+            );
+        } catch (IllegalArgumentException ex) {
+            return Map.of(
+                    "success", false,
+                    "message", ex.getMessage(),
+                    "count", getCartCount(principal.getName())
+            );
+        }
+    }
+
+    @GetMapping("/count")
+    @ResponseBody
+    public Map<String, Integer> cartCount(Principal principal) {
+        return Map.of("count", getCartCount(principal.getName()));
+    }
+
+    private int getCartCount(String email) {
+        return cartService.getCartItems(email).stream()
+                .mapToInt(item -> item.getQuantity() == null ? 0 : item.getQuantity())
+                .sum();
     }
 
     @PostMapping("/update")

@@ -4,8 +4,8 @@
       xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
 <body>
 
-<nav th:fragment="menu"
-     class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+<th:block th:fragment="menu">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
     <div class="container">
 
         <a class="navbar-brand fw-bold" th:href="@{/}">CLOTHING SHOP</a>
@@ -35,7 +35,13 @@
                 <li class="nav-item" sec:authorize="hasRole('CUSTOMER')">
                     <a class="nav-link px-3"
                        th:classappend="${currentPath != null and #strings.startsWith(currentPath, '/cart')} ? 'active bg-warning text-dark fw-bold rounded' : ''"
-                       th:href="@{/cart}">Giỏ hàng</a>
+                       th:href="@{/cart}">
+                        Giỏ hàng
+                        <span id="cart-count-badge"
+                              class="badge rounded-circle bg-danger ms-1 d-none"
+                              style="min-width: 20px; height: 20px; line-height: 14px;"
+                              aria-label="Số lượng sản phẩm trong giỏ">0</span>
+                    </a>
                 </li>
 
                 <li class="nav-item" sec:authorize="hasRole('CUSTOMER')">
@@ -44,7 +50,13 @@
                        th:href="@{/account/orders}">Đơn hàng của tôi</a>
                 </li>
 
-                <li class="nav-item" sec:authorize="hasAnyRole('ADMIN','STAFF')">
+                <!-- Mỗi vai trò chỉ thấy đúng một dashboard của mình. -->
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link px-3"
+                       th:classappend="${currentPath != null and (#strings.startsWith(currentPath, '/admin/dashboard') or currentPath == '/admin')} ? 'active bg-warning text-dark fw-bold rounded' : ''"
+                       th:href="@{/admin/dashboard}">Dashboard Admin</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('STAFF')">
                     <a class="nav-link px-3"
                        th:classappend="${currentPath != null and #strings.startsWith(currentPath, '/staff/dashboard')} ? 'active bg-warning text-dark fw-bold rounded' : ''"
                        th:href="@{/staff/dashboard}">Dashboard Staff</a>
@@ -55,12 +67,6 @@
                     <a class="nav-link px-3"
                        th:classappend="${currentPath != null and #strings.startsWith(currentPath, '/staff/orders')} ? 'active bg-warning text-dark fw-bold rounded' : ''"
                        th:href="@{/staff/orders}">Quản lý đơn hàng</a>
-                </li>
-
-                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
-                    <a class="nav-link px-3"
-                       th:classappend="${currentPath != null and #strings.startsWith(currentPath, '/admin')} ? 'active bg-warning text-dark fw-bold rounded' : ''"
-                       th:href="@{/admin}">Quản trị</a>
                 </li>
 
                 <li class="nav-item" sec:authorize="isAuthenticated()">
@@ -96,6 +102,76 @@
         </div>
     </div>
 </nav>
+
+<script th:inline="javascript">
+    (() => {
+        const badge = document.getElementById('cart-count-badge');
+        if (!badge) return;
+
+        const updateCartBadge = (count) => {
+            const value = Number(count || 0);
+            badge.textContent = value > 99 ? '99+' : String(value);
+            badge.classList.toggle('d-none', value <= 0);
+        };
+
+        const refreshCartBadge = async () => {
+            try {
+                const response = await fetch(/*[[@{/cart/count}]]*/ '/cart/count', {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    updateCartBadge(data.count);
+                }
+            } catch (error) {
+            }
+        };
+
+        document.addEventListener('submit', async (event) => {
+            const form = event.target.closest('form.add-to-cart-form');
+            if (!form) return;
+
+            event.preventDefault();
+            const button = form.querySelector('button[type="submit"]');
+            const originalText = button ? button.textContent.trim() : '';
+            if (button) {
+                button.disabled = true;
+                button.textContent = 'Đang thêm...';
+            }
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    updateCartBadge(data.count);
+                    if (button) {
+                        button.textContent = 'Đã thêm ✓';
+                        setTimeout(() => {
+                            button.textContent = originalText;
+                        }, 1400);
+                    }
+                } else {
+                    alert(data.message || 'Không thể thêm sản phẩm vào giỏ hàng.');
+                    updateCartBadge(data.count);
+                }
+            } catch (error) {
+                alert('Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng.');
+            } finally {
+                if (button) {
+                    button.disabled = false;
+                    if (button.textContent === 'Đang thêm...') button.textContent = originalText;
+                }
+            }
+        });
+
+        refreshCartBadge();
+    })();
+</script>
+</th:block>
 
 </body>
 </html>

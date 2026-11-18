@@ -36,6 +36,7 @@ Nhánh Git đề xuất: `feature/socket-concurrency` (**[ĐIỀN]** commit ID s
 | `src/test/java/.../network/ShopSocketServerTests.java` (19 test) | Không |
 | `src/test/java/.../network/BoundedLineReaderTests.java` (5 test) | Không |
 | `src/test/java/.../concurrency/InventorySocketConcurrencyTests.java` (4 test) | **Có**, SQL Server như `OrderTransactionIntegrationTests` |
+| `src/test/java/.../concurrency/OrderStockConcurrencyTests.java` (5 test, bổ sung cho Deadline 2: hủy/xác nhận đồng thời, trạng thái đơn qua Socket, chặn ADMIN/STAFF đặt hàng) | **Có**, SQL Server |
 
 **Tài liệu và script**
 
@@ -69,8 +70,8 @@ Không sửa file nào của thành viên khác. Nếu đã có thay đổi mớ
 | 7 | Kiểm tra dữ liệu, giới hạn kích thước | Xong (độ dài dòng, ký tự điều khiển, biểu thức chính quy cho SKU và mã đơn) |
 | 8 | Phục vụ ít nhất 3 client đồng thời | Xong, có test chứng minh |
 | 9 | Ngắt kết nối, timeout, đóng tài nguyên | Xong, có test |
-| 10 | Phối hợp thành viên 4 thiết kế test tồn kho | **Cần thành viên 4 xem lại** (mục 6) |
-| 11 | Test nhiều luồng chứng minh không vượt tồn kho | Viết xong; **chưa chạy với SQL Server** |
+| 10 | Phối hợp thành viên 4 thiết kế test tồn kho | `OrderStockConcurrencyTests` viết xong (TK-01 đến TK-05); **cần thành viên 4 xem lại** (mục 6) |
+| 11 | Test nhiều luồng chứng minh không vượt tồn kho | `InventorySocketConcurrencyTests` đã chạy đạt 4/4 trên SQL Server ngày 10/11/2026; **cần chạy lại trên code cuối**. `OrderStockConcurrencyTests` **chưa chạy** |
 | 12 | Log có thời điểm, client, luồng, kết quả | Xong |
 | 13 | Phần kiểm thử Chương 4 | Bản nháp; chờ điền kết quả thật và ảnh |
 | 14 | Kịch bản demo 3 client | Xong (`docs/DEMO_SOCKET_3_CLIENTS.md`) |
@@ -86,13 +87,14 @@ Dùng dữ liệu mẫu của `database/ClothingShopDB.sql`: SKU dạng `SKU-001
 mvnw spring-boot:run          # hoặc chạy ClothingShopApplication trong IntelliJ
 
 # Build và dùng client
-cd socket-client && mvn package
+.\mvnw.cmd -f socket-client\pom.xml package
 java -jar target/shop-socket-client-1.0.0.jar CHECK_STOCK SKU-001-M-BLK
 
 # Test
 mvnw test                                                  # tất cả
 mvnw test -Dtest="ShopSocketServerTests,BoundedLineReaderTests"   # không cần database
-mvnw test -Dtest=InventorySocketConcurrencyTests           # cần SQL Server
+mvnw test -Dtest="InventorySocketConcurrencyTests,OrderStockConcurrencyTests"   # cần SQL Server
+scripts\run-member5-tests.bat                                # chạy 4 lớp test và lưu kết quả vào logs\evidence
 ```
 
 ## 5. Kết quả đã kiểm tra và bằng chứng
@@ -109,7 +111,7 @@ Môi trường kiểm tra của thành viên 5 **không có Maven, không có SQ
 **Chưa chạy (cần nhóm làm)**
 
 - `mvnw test` thật trên máy nhóm (nên chạy toàn bộ để chắc các test của người khác vẫn đạt).
-- `InventorySocketConcurrencyTests` với SQL Server.
+- `OrderStockConcurrencyTests` với SQL Server (mới viết, chưa chạy lần nào).
 - Demo trên website thật và bước 6 trong kịch bản (đặt hàng khi client đang theo dõi).
 - Chưa có người khác review.
 

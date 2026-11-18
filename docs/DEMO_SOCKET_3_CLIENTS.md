@@ -16,11 +16,11 @@ Thời lượng gợi ý: 4 đến 5 phút trong buổi demo trực tiếp (ho�
 3. Build Socket Client một lần:
 
    ```
-   cd socket-client
-   mvn package
+   .\mvnw.cmd -f socket-client\pom.xml package
    ```
 
-   Kết quả: `socket-client/target/shop-socket-client-1.0.0.jar` (hoặc chạy `scripts\build-client.bat`).
+   (Dùng Maven Wrapper của project nên không cần cài `mvn` riêng; cũng có thể chạy `scripts\build-client.bat`.)
+   Kết quả: `socket-client\target\shop-socket-client-1.0.0.jar`.
 4. Windows: nếu console hiển thị sai tiếng Việt, gõ `chcp 65001` trước khi chạy client.
 
 ## 2. Các bước demo
@@ -77,13 +77,20 @@ Trong cửa sổ của client D nhấn `Ctrl + C` (hoặc đóng cửa sổ) khi
 Giữ một client lặp lại `CHECK_STOCK` (ví dụ `--repeat 30 --interval 1000`). Trên website (cổng 8081) đăng nhập khách hàng, đặt mua đúng SKU đó. Client sẽ thấy `stockQuantity` giảm đúng số lượng đã mua.
 
 ### Bước 7: Kiểm thử đồng thời (không bán vượt tồn kho)
-Chạy:
+Tắt website rồi chạy (cần SQL Server):
 
 ```
-mvnw test -Dtest=InventorySocketConcurrencyTests
+.\mvnw.cmd test -Dtest="InventorySocketConcurrencyTests,OrderStockConcurrencyTests"
 ```
+
+Hoặc chạy `scripts\run-member5-tests.bat` để vừa chạy vừa lưu kết quả vào `logs\evidence`.
 
 Chỉ ra phần log in ra: nhiều luồng `checkout-N` cùng `START`, rồi `SUCCESS` hoặc `OUT_OF_STOCK`, và các test kết thúc `PASSED`. Kịch bản chính: kho còn 2, 3 khách mua cùng lúc, đúng 2 thành công, kho về 0, không ra số âm.
+
+Với `OrderStockConcurrencyTests`, chỉ ra thêm dòng `[TEST] TK-02: khách hủy thắng ... vòng, staff xác nhận thắng ... vòng` (cả hai kết quả đều hợp lệ miễn là chỉ một bên thắng) và các kết quả đều khớp với Socket.
+
+### Bước 8: Trạng thái đơn qua Socket đi theo Staff
+Trên website, đăng nhập Staff, xác nhận đơn `ORD-xxxx` vừa tạo (PENDING sang CONFIRMED, rồi các bước tiếp theo). Ở client chạy `GET_ORDER_STATUS ORD-xxxx` sau mỗi lần đổi, trạng thái phải khớp. Khách hủy đơn đang PENDING thì `CHECK_STOCK` thấy tồn kho tăng lại đúng số lượng.
 
 ## 3. Danh sách kiểm tra trước giờ demo
 

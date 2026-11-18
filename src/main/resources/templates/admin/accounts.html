@@ -4,11 +4,9 @@
 <body class="admin-bg">
 <div th:replace="~{fragments/admin-menu :: menu}"></div>
 <main class="container py-4">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
-        <div>
-            <div class="text-secondary small fw-semibold">QUẢN TRỊ / NGƯỜI DÙNG</div>
-            <h2 class="fw-bold mb-0">Quản lý tài khoản</h2></div>
-        <a th:href="@{/admin}" class="btn btn-outline-secondary">Về tổng quan</a>
+    <div class="mb-4">
+        <div class="text-secondary small fw-semibold">QUẢN TRỊ / NGƯỜI DÙNG</div>
+        <h2 class="fw-bold mb-0">Quản lý tài khoản</h2>
     </div>
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>

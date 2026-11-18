@@ -36,6 +36,18 @@
             gap: 22px;
         }
 
+        .product-link {
+            display: block;
+            color: inherit;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+
+        .product-link:focus-visible {
+            outline: 3px solid #0d6efd;
+            outline-offset: 4px;
+        }
+
         .product {
             background: white;
             border-radius: 8px;
@@ -46,8 +58,12 @@
             flex-direction: column;
         }
 
-        .product:hover {
+        .product-link:hover .product {
             transform: translateY(-4px);
+        }
+
+        .product-link:hover h3 {
+            color: #c0392b;
         }
 
         .product img {
@@ -188,7 +204,9 @@
     <div class="product-list"
          th:if="${products != null and !#lists.isEmpty(products)}">
 
-        <article class="product" th:each="product : ${products}">
+        <a class="product-link" th:each="product : ${products}"
+           th:href="@{/products/{id}(id=${product.productId})}">
+        <article class="product">
 
             <img th:if="${product.imageUrl != null and !#strings.isEmpty(product.imageUrl)}"
                  th:src="@{${product.imageUrl}}"
@@ -213,33 +231,10 @@
                     Mô tả sản phẩm
                 </p>
 
-                <div class="mt-auto pt-3 d-grid gap-2">
-                    <div class="row g-2" sec:authorize="!hasAnyRole('ADMIN', 'STAFF')">
-                        <div class="col-6">
-                            <form th:action="@{/cart/add}" method="post" class="m-0">
-                                <input type="hidden" name="productId" th:value="${product.productId}">
-                                <input type="hidden" name="quantity" value="1">
-                                <button type="submit" class="btn btn-outline-dark btn-sm w-100">
-                                    Thêm vào giỏ
-                                </button>
-                            </form>
-                        </div>
-                        <div class="col-6">
-                            <a class="btn btn-danger btn-sm w-100 fw-semibold"
-                               th:href="@{/products/{id}(id=${product.productId}, buyNow=true)}">
-                                Mua ngay
-                            </a>
-                        </div>
-                    </div>
-
-                    <a class="btn btn-dark btn-sm w-100"
-                       th:href="@{/products/{id}(id=${product.productId})}">
-                        Xem chi tiết
-                    </a>
-                </div>
             </div>
 
         </article>
+        </a>
     </div>
 
     <p class="empty"

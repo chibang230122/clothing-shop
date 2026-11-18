@@ -1,71 +1,129 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/header :: header('Tổng quan quản trị')}"></head>
+<head th:replace="~{fragments/header :: header('Dashboard quản trị')}"></head>
 <body class="admin-bg">
 <div th:replace="~{fragments/admin-menu :: menu}"></div>
 <main class="container py-4 py-lg-5">
     <section class="admin-hero mb-4">
         <div class="small text-uppercase fw-semibold opacity-75 mb-2">Khu vực dành cho quản trị viên</div>
-        <h1 class="fw-bold mb-2">Tổng quan hệ thống</h1>
-        <p class="mb-0 opacity-75">Quản lý người dùng, sản phẩm, danh mục và theo dõi quy mô cửa hàng.</p>
+        <h1 class="fw-bold mb-2">Dashboard</h1>
+        <p class="mb-0 opacity-75">Tổng quan hoạt động và tình hình kinh doanh của cửa hàng.</p>
     </section>
+
     <div class="row g-3 mb-4">
-        <div class="col-6 col-lg-4">
-            <div class="admin-stat">
+        <div class="col-12 col-md-6 col-xl-3">
+            <a class="admin-stat d-block h-100 text-decoration-none" th:href="@{/staff/orders}">
+                <div class="admin-stat-label">Doanh thu tháng này</div>
+                <div class="admin-stat-number text-success"
+                     th:text="${#numbers.formatDecimal(monthlyRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
+                <small class="text-secondary">Doanh thu tháng hiện tại</small>
+            </a>
+        </div>
+        <div class="col-6 col-xl-3">
+            <a class="admin-stat d-block h-100 text-decoration-none" th:href="@{/staff/orders}">
+                <div class="admin-stat-label">Tổng đơn hàng</div>
+                <div class="admin-stat-number" th:text="${orders}">0</div>
+                <small class="text-secondary">Xem danh sách đơn hàng</small>
+            </a>
+        </div>
+        <div class="col-6 col-xl-3">
+            <a class="admin-stat d-block h-100 text-decoration-none" th:href="@{/staff/orders}">
+                <div class="admin-stat-label">Chờ xác nhận</div>
+                <div class="admin-stat-number text-warning" th:text="${pendingOrders}">0</div>
+                <small class="text-secondary">Đơn cần xử lý</small>
+            </a>
+        </div>
+        <div class="col-6 col-xl-3">
+            <a class="admin-stat d-block h-100 text-decoration-none" th:href="@{/admin/accounts}">
                 <div class="admin-stat-label">Tổng tài khoản</div>
                 <div class="admin-stat-number" th:text="${totalUsers}">0</div>
                 <small class="text-secondary" th:text="${activeUsers} + ' đang hoạt động'">0 đang hoạt động</small>
-            </div>
+            </a>
         </div>
-        <div class="col-6 col-lg-4">
-            <div class="admin-stat">
+        <div class="col-6 col-xl-3">
+            <a class="admin-stat d-block h-100 text-decoration-none" th:href="@{/admin/accounts}">
                 <div class="admin-stat-label">Khách hàng</div>
                 <div class="admin-stat-number" th:text="${customers}">0</div>
-                <small class="text-secondary">Tài khoản CUSTOMER</small></div>
+                <small class="text-secondary">Tài khoản khách hàng</small>
+            </a>
         </div>
-        <div class="col-6 col-lg-4">
-            <div class="admin-stat">
+        <div class="col-6 col-xl-3">
+            <a class="admin-stat d-block h-100 text-decoration-none" th:href="@{/admin/products}">
                 <div class="admin-stat-label">Sản phẩm</div>
                 <div class="admin-stat-number" th:text="${products}">0</div>
-                <small class="text-secondary">Tất cả sản phẩm</small></div>
+                <small class="text-secondary">Quản lý sản phẩm</small>
+            </a>
         </div>
-        <div class="col-6 col-lg-4">
-            <div class="admin-stat">
+        <div class="col-6 col-xl-3">
+            <a class="admin-stat d-block h-100 text-decoration-none" th:href="@{/admin/categories}">
                 <div class="admin-stat-label">Danh mục</div>
                 <div class="admin-stat-number" th:text="${categories}">0</div>
-                <small class="text-secondary">Tổng số danh mục</small></div>
-        </div>
-        <div class="col-6 col-lg-4">
-            <div class="admin-stat">
-                <div class="admin-stat-label">Đơn hàng</div>
-                <div class="admin-stat-number" th:text="${orders}">0</div>
-                <small class="text-secondary">Tổng số đơn hàng</small></div>
+                <small class="text-secondary">Quản lý danh mục</small>
+            </a>
         </div>
     </div>
-    <h4 class="fw-semibold mb-3">Quản lý nhanh</h4>
+
+    <section class="mt-5 mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <div>
+                <h4 class="fw-semibold mb-1">Lịch sử doanh thu</h4>
+                <p class="text-secondary mb-0">Doanh thu được lưu theo tháng từ các đơn hàng hoàn thành. Sang tháng mới, tháng trước tự động nằm trong lịch sử.</p>
+            </div>
+            <div class="text-end">
+                <div class="small text-secondary" th:text="'Tháng ' + ${selectedRevenueMonth} + '/' + ${selectedRevenueYear}">Tháng</div>
+                <div class="h4 text-success mb-0" th:text="${#numbers.formatDecimal(selectedRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
+            </div>
+        </div>
+        <div class="table-responsive bg-white rounded-3 shadow-sm">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th class="px-3">Tháng</th>
+                    <th class="text-end px-3">Doanh thu</th>
+                    <th class="text-end px-3">Xem</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${revenueHistory}">
+                    <td class="px-3" th:text="'Tháng ' + ${item.revenueMonth} + '/' + ${item.revenueYear}">Tháng</td>
+                    <td class="text-end px-3 fw-semibold" th:text="${#numbers.formatDecimal(item.revenueAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</td>
+                    <td class="text-end px-3">
+                        <a class="btn btn-sm btn-outline-primary"
+                           th:href="@{/admin/dashboard(revenueYear=${item.revenueYear},revenueMonth=${item.revenueMonth})}">Xem doanh thu</a>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(revenueHistory)}">
+                    <td colspan="3" class="text-center text-secondary py-4">Chưa có doanh thu từ đơn hàng hoàn thành.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <h4 class="fw-semibold mb-3">Truy cập nhanh</h4>
     <div class="row g-3">
         <div class="col-md-6 col-lg-3">
-            <a class="admin-quick" th:href="@{/admin/accounts}">
-                <span class="h5 d-block">Quản lý tài khoản</span>
-                <small>Tra cứu, khóa/mở khóa và phân vai trò Customer/Staff</small>
-            </a>
-        </div>
-        <div class="col-md-6 col-lg-3">
-            <a class="admin-quick" th:href="@{/admin/products}">
+            <a class="admin-quick h-100" th:href="@{/admin/products}">
                 <span class="h5 d-block">Quản lý sản phẩm</span>
-                <small>Xem, thêm, cập nhật sản phẩm và biến thể</small>
+                <small>Thêm, sửa và quản lý sản phẩm, biến thể</small>
             </a>
         </div>
         <div class="col-md-6 col-lg-3">
-            <a class="admin-quick" th:href="@{/admin/categories}">
-                <span class="h5 d-block">Quản lý danh mục</span>
-                <small>Thêm, chỉnh sửa và quản lý danh mục</small>
-            </a>
-        </div>
-        <div class="col-md-6 col-lg-3">
-            <a class="admin-quick" th:href="@{/staff/orders}">
+            <a class="admin-quick h-100" th:href="@{/staff/orders}">
                 <span class="h5 d-block">Quản lý đơn hàng</span>
-                <small>Xem danh sách, chi tiết và xử lý trạng thái đơn hàng</small>
+                <small>Xem và cập nhật trạng thái đơn hàng</small>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a class="admin-quick h-100" th:href="@{/admin/accounts}">
+                <span class="h5 d-block">Quản lý khách hàng</span>
+                <small>Tra cứu và quản lý tài khoản</small>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a class="admin-quick h-100" th:href="@{/admin/categories}">
+                <span class="h5 d-block">Quản lý danh mục</span>
+                <small>Thêm và cập nhật danh mục</small>
             </a>
         </div>
     </div>
