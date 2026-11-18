@@ -1,148 +1,265 @@
-
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{fragments/header :: header('Chi tiết sản phẩm - Clothing Shop')}"></head>
 <body class="bg-light">
-
 <div th:replace="~{fragments/bootstrap-menu :: menu}"></div>
 
-<main class="container py-5">
+<style>
+    .detail-shell { max-width: 1240px; }
+    .detail-card { border: 0; border-radius: 22px; overflow: hidden; }
+    .detail-image-wrap { background: #f2f2f2; border-radius: 18px; min-height: 440px; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+    .detail-image { width:100%; height: min(68vh, 620px); min-height:440px; object-fit:contain; }
+    .detail-title { font-size: clamp(1.8rem, 3vw, 2.5rem); font-weight:750; letter-spacing:-.5px; }
+    .detail-price { color:#dc3545; font-size:2rem; font-weight:800; }
+    .option-label { font-weight:700; margin-bottom:12px; }
+    .option-buttons { display:flex; flex-wrap:wrap; gap:10px; }
+    .option-btn { min-width:52px; min-height:46px; border:1px solid #c9cdd2; border-radius:9px; background:#fff; color:#212529; padding:9px 16px; font-weight:650; transition:.15s ease; }
+    .option-btn:hover:not(:disabled) { border-color:#212529; }
+    .option-btn.active { color:#fff; background:#212529; border-color:#212529; box-shadow:0 0 0 2px #fff,0 0 0 4px #212529; }
+    .option-btn:disabled { opacity:.35; text-decoration:line-through; cursor:not-allowed; background:#f1f1f1; }
+    .color-btn { min-width:76px; }
+    .detail-action { min-height:52px; border-radius:999px; font-weight:750; letter-spacing:.2px; }
+    .quantity-control { display:flex; align-items:center; width:180px; height:48px; border:1px solid #d9dde2; border-radius:999px; overflow:hidden; background:#fff; }
+    .quantity-control button { width:48px; height:100%; border:0; background:#f5f6f7; font-size:1.35rem; }
+    .quantity-control input { width:82px; height:100%; border:0; outline:0; text-align:center; font-weight:700; }
+    .recommend-card { color:inherit; text-decoration:none; display:block; height:100%; }
+    .recommend-card .card { transition:transform .18s ease,box-shadow .18s ease; }
+    .recommend-card:hover .card { transform:translateY(-4px); box-shadow:0 .75rem 1.5rem rgba(0,0,0,.12)!important; }
+    .recommend-card:hover .card-title { color:#dc3545; }
+    .stock-note { font-size:.92rem; }
+    @media(max-width:767px) { .detail-image-wrap,.detail-image { min-height:300px; height:360px; } .detail-card .card-body { padding:1.25rem!important; } }
+</style>
 
-    <div class="mb-4">
-        <a th:href="@{/products}" class="btn btn-outline-dark btn-sm">
-            &larr; Quay lại danh sách
-        </a>
-    </div>
+<main class="container detail-shell py-4 py-lg-5">
+    <a th:href="@{/products}" class="text-decoration-none text-secondary d-inline-flex align-items-center gap-2 mb-4">&larr; Quay lại sản phẩm</a>
 
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-4 p-md-5">
-            <div class="row g-4">
-
-                <div class="col-12 col-md-5">
-                    <img th:if="${product.imageUrl != null and !#strings.isEmpty(product.imageUrl)}"
-                         th:src="${product.imageUrl}"
-                         th:alt="${product.productName}"
-                         class="img-fluid rounded w-100"
-                         style="max-height:450px;object-fit:cover;">
-
-                    <div th:unless="${product.imageUrl != null and !#strings.isEmpty(product.imageUrl)}"
-                         class="bg-secondary-subtle rounded d-flex align-items-center justify-content-center"
-                         style="height:350px;">
-                        <span class="text-secondary">Chưa có hình ảnh</span>
+    <section class="card detail-card shadow-sm">
+        <div class="card-body p-3 p-lg-5">
+            <div class="row g-4 g-lg-5 align-items-start">
+                <div class="col-12 col-lg-6">
+                    <div class="detail-image-wrap">
+                        <img th:if="${product.imageUrl != null and !#strings.isEmpty(product.imageUrl)}"
+                             th:src="${product.imageUrl}" th:alt="${product.productName}" class="detail-image">
+                        <div th:unless="${product.imageUrl != null and !#strings.isEmpty(product.imageUrl)}" class="text-secondary">Chưa có hình ảnh</div>
                     </div>
                 </div>
 
-                <div class="col-12 col-md-7">
+                <div class="col-12 col-lg-6">
+                    <div class="text-uppercase text-secondary small fw-semibold mb-2">Clothing Shop</div>
+                    <h1 class="detail-title mb-3" th:text="${product.productName}">Tên sản phẩm</h1>
+                    <div class="detail-price mb-3" th:text="${#numbers.formatDecimal(product.basePrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">149.000 đ</div>
+                    <p class="text-secondary mb-4" th:if="${product.description != null and !#strings.isEmpty(product.description)}" th:text="${product.description}">Mô tả sản phẩm</p>
+                    <p class="text-secondary mb-4" th:if="${product.description == null or #strings.isEmpty(product.description)}">Sản phẩm thời trang dành cho phong cách hằng ngày.</p>
 
-                    <h2 class="fw-bold mb-3"
-                        th:text="${product.productName}">
-                        Tên sản phẩm
-                    </h2>
+                    <div th:if="${variants != null and !#lists.isEmpty(variants)}" id="variantPicker">
+                        <div class="mb-4">
+                            <div class="option-label">Chọn kích thước <span class="text-secondary fw-normal" id="selectedSizeLabel"></span></div>
+                            <div class="option-buttons" id="sizeOptions"></div>
+                        </div>
 
-                    <h3 class="text-danger fw-bold mb-4"
-                        th:text="${#numbers.formatDecimal(product.basePrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">
-                        150.000 đ
-                    </h3>
+                        <div class="mb-4">
+                            <div class="option-label">Chọn màu sắc <span class="text-secondary fw-normal" id="selectedColorLabel"></span></div>
+                            <div class="option-buttons" id="colorOptions"></div>
+                        </div>
 
-                    <h5 class="fw-bold">Mô tả sản phẩm</h5>
+                        <div class="border-top pt-3 mb-3">
+                            <div id="variantStock" class="stock-note text-secondary">Vui lòng chọn size và màu sắc.</div>
+                        </div>
 
-                    <p class="text-secondary"
-                       th:if="${product.description != null and !#strings.isEmpty(product.description)}"
-                       th:text="${product.description}">
-                        Mô tả sản phẩm
-                    </p>
+                        <div class="mb-4">
+                            <div class="option-label">Số lượng</div>
+                            <div class="quantity-control">
+                                <button type="button" id="decreaseQuantity" aria-label="Giảm số lượng">−</button>
+                                <input type="number" id="quantitySelector" value="1" min="1" max="99" inputmode="numeric" aria-label="Số lượng">
+                                <button type="button" id="increaseQuantity" aria-label="Tăng số lượng">+</button>
+                            </div>
+                            <div class="small text-secondary mt-2">Số lượng tối đa theo tồn kho của phân loại đã chọn.</div>
+                        </div>
 
-                    <p class="text-secondary"
-                       th:if="${product.description == null or #strings.isEmpty(product.description)}">
-                        Chưa có mô tả cho sản phẩm này.
-                    </p>
+                        <div sec:authorize="hasRole('CUSTOMER')" class="d-grid gap-3">
+                            <form th:action="@{/cart/add-ajax}" method="post" class="add-to-cart-form" id="detailAddCartForm">
+                                <input type="hidden" name="variantId" id="selectedVariantId">
+                                <input type="hidden" name="quantity" id="addCartQuantity" value="1">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <button type="submit" class="btn btn-dark detail-action w-100" id="addCartButton" disabled>THÊM VÀO GIỎ HÀNG</button>
+                            </form>
+                            <form method="get" id="buyNowForm">
+                                <input type="hidden" name="quantity" id="buyNowQuantity" value="1">
+                                <button type="submit" class="btn btn-danger detail-action w-100" id="buyNowButton" disabled>MUA NGAY</button>
+                            </form>
+                        </div>
 
-                    <hr>
+                        <div sec:authorize="isAnonymous()" class="d-grid">
+                            <a th:href="@{/login}" class="btn btn-dark detail-action">ĐĂNG NHẬP ĐỂ MUA HÀNG</a>
+                        </div>
 
-                    <h5 class="fw-bold mb-3">Kích thước và màu sắc</h5>
-
-                    <div class="table-responsive"
-                         th:if="${variants != null and !#lists.isEmpty(variants)}">
-
-                        <table class="table table-bordered table-hover align-middle">
-
-                            <thead class="table-dark">
-                            <tr>
-                                <th>Size</th>
-                                <th>Màu sắc</th>
-                                <th>Mã SKU</th>
-                                <th>Tồn kho</th>
-                                <th>Trạng thái</th>
-                                <th sec:authorize="isAnonymous() or hasRole('CUSTOMER')">Thao tác</th>
-                            </tr>
-                            </thead>
-
-                            <tbody>
-                            <tr th:each="variant : ${variants}">
-
-                                <td th:text="${variant.size}">M</td>
-
-                                <td th:text="${variant.color}">Đen</td>
-
-                                <td th:text="${variant.sku}">AO001-M-DEN</td>
-
-                                <td th:text="${variant.stockQuantity}">10</td>
-
-                                <td>
-                                    <span th:if="${variant.stockQuantity != null and variant.stockQuantity > 0}"
-                                          class="badge bg-success">
-                                        Còn hàng
-                                    </span>
-
-                                    <span th:unless="${variant.stockQuantity != null and variant.stockQuantity > 0}"
-                                          class="badge bg-danger">
-                                        Hết hàng
-                                    </span>
-                                </td>
-
-                                <td sec:authorize="isAnonymous() or hasRole('CUSTOMER')">
-                                    <a sec:authorize="isAnonymous()"
-                                       th:if="${variant.stockQuantity != null and variant.stockQuantity > 0}"
-                                       th:href="@{/login}" class="btn btn-outline-dark btn-sm">
-                                        Đăng nhập để mua
-                                    </a>
-                                    <div sec:authorize="hasRole('CUSTOMER')" class="d-flex flex-wrap gap-2">
-                                        <form th:action="@{/cart/add}" method="post">
-                                            <input type="hidden" name="variantId" th:value="${variant.variantId}">
-                                            <input type="hidden" name="quantity" value="1">
-                                            <button type="submit" class="btn btn-outline-dark btn-sm">Thêm vào giỏ</button>
-                                        </form>
-                                        <form th:action="@{/checkout/buy-now/{id}(id=${variant.variantId})}" method="get">
-                                            <input type="hidden" name="quantity" value="1">
-                                            <button type="submit" class="btn btn-danger btn-sm">Mua ngay</button>
-                                        </form>
-                                    </div>
-
-                                    <button th:unless="${variant.stockQuantity != null and variant.stockQuantity > 0}"
-                                            class="btn btn-secondary btn-sm"
-                                            disabled>
-                                        Hết hàng
-                                    </button>
-                                </td>
-
-                            </tr>
-                            </tbody>
-                        </table>
+                        <div id="variantData" class="d-none">
+                            <span th:each="variant : ${variants}"
+                                  class="variant-data"
+                                  th:attr="data-id=${variant.variantId},data-size=${variant.size},data-color=${variant.color},data-stock=${variant.stockQuantity}"></span>
+                        </div>
                     </div>
 
-                    <div class="alert alert-warning"
-                         th:if="${variants == null or #lists.isEmpty(variants)}">
-                        Sản phẩm hiện chưa có biến thể đang hoạt động.
+                    <div class="alert alert-warning mb-0" th:if="${variants == null or #lists.isEmpty(variants)}">
+                        Sản phẩm hiện chưa có phân loại để mua.
                     </div>
-
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 </main>
 
-<div th:replace="~{fragments/footer :: footer}"></div>
+<script th:if="${variants != null and !#lists.isEmpty(variants)}">
+(() => {
+    const rows = Array.from(document.querySelectorAll('#variantData .variant-data')).map(el => ({
+        id: el.dataset.id,
+        size: el.dataset.size,
+        color: el.dataset.color,
+        stock: Number(el.dataset.stock || 0)
+    }));
+    const sizeWrap = document.getElementById('sizeOptions');
+    const colorWrap = document.getElementById('colorOptions');
+    const sizeLabel = document.getElementById('selectedSizeLabel');
+    const colorLabel = document.getElementById('selectedColorLabel');
+    const stockLabel = document.getElementById('variantStock');
+    const variantInput = document.getElementById('selectedVariantId');
+    const addButton = document.getElementById('addCartButton');
+    const buyButton = document.getElementById('buyNowButton');
+    const buyForm = document.getElementById('buyNowForm');
+    const quantitySelector = document.getElementById('quantitySelector');
+    const addCartQuantity = document.getElementById('addCartQuantity');
+    const buyNowQuantity = document.getElementById('buyNowQuantity');
+    const decreaseQuantity = document.getElementById('decreaseQuantity');
+    const increaseQuantity = document.getElementById('increaseQuantity');
+    const sizes = [...new Set(rows.map(x => x.size))];
+    const colors = [...new Set(rows.map(x => x.color))];
+    let selectedSize = '';
+    let selectedColor = '';
+    let selectedStock = 0;
 
+    function syncQuantity() {
+        let quantity = Number.parseInt(quantitySelector.value, 10);
+        if (!Number.isFinite(quantity) || quantity < 1) quantity = 1;
+        quantity = Math.min(quantity, Math.max(1, selectedStock));
+        quantitySelector.value = quantity;
+        quantitySelector.max = Math.max(1, selectedStock);
+        addCartQuantity.value = quantity;
+        buyNowQuantity.value = quantity;
+        decreaseQuantity.disabled = quantity <= 1;
+        increaseQuantity.disabled = !selectedStock || quantity >= selectedStock;
+    }
+
+    decreaseQuantity.addEventListener('click', () => {
+        quantitySelector.value = Math.max(1, Number(quantitySelector.value || 1) - 1);
+        syncQuantity();
+    });
+    increaseQuantity.addEventListener('click', () => {
+        quantitySelector.value = Math.min(selectedStock, Number(quantitySelector.value || 1) + 1);
+        syncQuantity();
+    });
+    quantitySelector.addEventListener('change', syncQuantity);
+    quantitySelector.addEventListener('input', () => {
+        if (quantitySelector.value !== '') syncQuantity();
+    });
+
+    function available(size, color) {
+        return rows.find(x => x.size === size && x.color === color && x.stock > 0);
+    }
+
+    function render() {
+        sizeWrap.innerHTML = '';
+        colorWrap.innerHTML = '';
+        sizes.forEach(size => {
+            const hasStock = rows.some(x => x.size === size && x.stock > 0);
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'option-btn' + (selectedSize === size ? ' active' : '');
+            button.textContent = size;
+            button.disabled = !hasStock;
+            button.addEventListener('click', () => {
+                selectedSize = size;
+                if (!available(selectedSize, selectedColor)) {
+                    const first = colors.find(color => available(selectedSize, color));
+                    selectedColor = first || '';
+                }
+                render();
+            });
+            sizeWrap.appendChild(button);
+        });
+        colors.forEach(color => {
+            const hasStock = rows.some(x => x.color === color && x.stock > 0);
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'option-btn color-btn' + (selectedColor === color ? ' active' : '');
+            button.textContent = color;
+            button.disabled = !hasStock || !rows.some(x => x.size === selectedSize && x.color === color && x.stock > 0);
+            button.addEventListener('click', () => { selectedColor = color; render(); });
+            colorWrap.appendChild(button);
+        });
+
+        const selected = available(selectedSize, selectedColor);
+        sizeLabel.textContent = selectedSize ? `(${selectedSize})` : '';
+        colorLabel.textContent = selectedColor ? `(${selectedColor})` : '';
+        if (selected) {
+            selectedStock = selected.stock;
+            syncQuantity();
+            variantInput.value = selected.id;
+            stockLabel.textContent = `Còn ${selected.stock} sản phẩm`;
+            stockLabel.className = 'stock-note text-success fw-semibold';
+            addButton.disabled = false;
+            buyButton.disabled = false;
+            buyForm.action = `/checkout/buy-now/${selected.id}`;
+        } else {
+            selectedStock = 0;
+            quantitySelector.value = 1;
+            syncQuantity();
+            variantInput.value = '';
+            stockLabel.textContent = 'Biến thể này hiện đã hết hàng. Vui lòng chọn phân loại khác.';
+            stockLabel.className = 'stock-note text-danger fw-semibold';
+            addButton.disabled = true;
+            buyButton.disabled = true;
+            buyForm.removeAttribute('action');
+        }
+    }
+
+    const first = rows.find(x => x.stock > 0);
+    if (first) {
+        selectedSize = first.size;
+        selectedColor = first.color;
+    }
+    render();
+})();
+</script>
+
+<section class="container detail-shell py-5" th:if="${recommendedProducts != null and !#lists.isEmpty(recommendedProducts)}">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <div class="text-uppercase text-secondary small fw-semibold mb-1">Gợi ý dành cho bạn</div>
+            <h2 class="fw-bold mb-0">Có thể bạn sẽ thích</h2>
+        </div>
+        <a th:href="@{/products}" class="text-decoration-none text-dark fw-semibold">Xem tất cả</a>
+    </div>
+    <div class="row g-4">
+        <div class="col-6 col-md-3" th:each="item : ${recommendedProducts}">
+            <a class="recommend-card" th:href="@{/products/{id}(id=${item.productId})}">
+                <div class="card border-0 shadow-sm h-100 overflow-hidden">
+                    <img th:if="${item.imageUrl != null and !#strings.isEmpty(item.imageUrl)}"
+                         th:src="${item.imageUrl}" th:alt="${item.productName}"
+                         style="height:220px;width:100%;object-fit:cover;">
+                    <div th:unless="${item.imageUrl != null and !#strings.isEmpty(item.imageUrl)}"
+                         class="bg-secondary-subtle d-flex align-items-center justify-content-center text-secondary"
+                         style="height:220px;">Chưa có hình ảnh</div>
+                    <div class="card-body">
+                        <h6 class="card-title fw-bold" th:text="${item.productName}">Tên sản phẩm</h6>
+                        <div class="text-danger fw-bold" th:text="${#numbers.formatDecimal(item.basePrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</section>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
 </body>
 </html>

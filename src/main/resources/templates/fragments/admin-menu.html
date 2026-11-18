@@ -7,56 +7,53 @@
 <nav th:fragment="menu"
      class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
     <div class="container-fluid px-4">
-
-        <a class="navbar-brand fw-bold" th:href="@{/admin}">
+        <a class="navbar-brand fw-bold" th:href="@{/admin/dashboard}" sec:authorize="hasRole('ADMIN')">
             CLOTHING <span class="text-warning">ADMIN</span>
         </a>
-
+        <a class="navbar-brand fw-bold" th:href="@{/staff/dashboard}" sec:authorize="hasRole('STAFF')">
+            CLOTHING <span class="text-warning">STAFF</span>
+        </a>
         <button class="navbar-toggler" type="button"
                 data-bs-toggle="collapse"
                 data-bs-target="#adminNavbarMenu"
                 aria-controls="adminNavbarMenu" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-
         <div class="collapse navbar-collapse" id="adminNavbarMenu">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-lg-1">
-                <li class="nav-item">
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                     <a class="nav-link px-3"
-                       th:classappend="${currentPath == '/admin'} ? 'active bg-warning text-dark fw-bold rounded' : ''"
-                       th:href="@{/admin}">Tổng quan</a>
+                       th:classappend="${currentPath == '/admin' or currentPath == '/admin/dashboard'} ? 'active bg-warning text-dark fw-bold rounded' : ''"
+                       th:href="@{/admin/dashboard}">Dashboard Admin</a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" sec:authorize="hasRole('STAFF')">
+                    <a class="nav-link px-3"
+                       th:classappend="${currentPath == '/staff/dashboard'} ? 'active bg-warning text-dark fw-bold rounded' : ''"
+                       th:href="@{/staff/dashboard}">Dashboard Staff</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                     <a class="nav-link px-3"
                        th:classappend="${currentPath != null and #strings.startsWith(currentPath, '/admin/products')} ? 'active bg-warning text-dark fw-bold rounded' : ''"
-                       th:href="@{/admin/products}">Sản phẩm</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link px-3"
-                       th:classappend="${currentPath != null and #strings.startsWith(currentPath, '/admin/categories')} ? 'active bg-warning text-dark fw-bold rounded' : ''"
-                       th:href="@{/admin/categories}">Danh mục</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link px-3"
-                       th:classappend="${currentPath != null and #strings.startsWith(currentPath, '/admin/accounts')} ? 'active bg-warning text-dark fw-bold rounded' : ''"
-                       th:href="@{/admin/accounts}">Tài khoản</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link px-3"
-                       th:classappend="${currentPath != null and #strings.startsWith(currentPath, '/staff/dashboard')} ? 'active bg-warning text-dark fw-bold rounded' : ''"
-                       th:href="@{/staff/dashboard}">Dashboard Staff</a>
+                       th:href="@{/admin/products}">Quản lý sản phẩm</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link px-3"
                        th:classappend="${currentPath != null and #strings.startsWith(currentPath, '/staff/orders')} ? 'active bg-warning text-dark fw-bold rounded' : ''"
                        th:href="@{/staff/orders}">Quản lý đơn hàng</a>
                 </li>
-            </ul>
-
-            <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
-                <li class="nav-item">
-                    <a class="nav-link px-3" th:href="@{/}">Về cửa hàng</a>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link px-3"
+                       th:classappend="${currentPath != null and #strings.startsWith(currentPath, '/admin/accounts')} ? 'active bg-warning text-dark fw-bold rounded' : ''"
+                       th:href="@{/admin/accounts}">Quản lý khách hàng / tài khoản</a>
                 </li>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link px-3"
+                       th:classappend="${currentPath != null and #strings.startsWith(currentPath, '/admin/categories')} ? 'active bg-warning text-dark fw-bold rounded' : ''"
+                       th:href="@{/admin/categories}">Danh mục</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+                <li class="nav-item"><a class="nav-link px-3" th:href="@{/}">Về cửa hàng</a></li>
                 <li class="nav-item" sec:authorize="isAuthenticated()">
                     <th:block th:replace="~{fragments/account-controls :: identity('nav-link px-3 text-info fw-semibold')}"></th:block>
                 </li>
@@ -75,6 +72,5 @@
         </div>
     </div>
 </nav>
-
 </body>
 </html>

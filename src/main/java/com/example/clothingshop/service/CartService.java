@@ -46,6 +46,24 @@ public class CartService {
                 .orElse(Collections.emptyList());
     }
     @Transactional
+    public CartItem addProductItem(String email, Integer productId, Integer quantity) {
+        if (productId == null) {
+            throw new IllegalArgumentException("Sản phẩm không hợp lệ.");
+        }
+
+        ProductVariant variant = productVariantRepository
+                .findByProduct_ProductIdAndIsActiveTrue(productId)
+                .stream()
+                .filter(v -> Boolean.TRUE.equals(v.getProduct().getIsActive()))
+                .filter(v -> v.getStockQuantity() != null && v.getStockQuantity() > 0)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Sản phẩm hiện đã hết hàng hoặc chưa có biến thể kinh doanh."));
+
+        return addItem(email, variant.getVariantId(), quantity);
+    }
+
+    @Transactional
     public CartItem addItem(String email, Integer variantId, Integer quantity) {
 
         if (variantId == null) {

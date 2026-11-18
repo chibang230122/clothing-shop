@@ -1,21 +1,75 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/header :: header('Dashboard Staff')}"></head>
-<body>
-<div th:replace="~{fragments/bootstrap-menu :: menu}"></div>
-<main class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Dashboard nhân viên</h2>
-        <a th:href="@{/staff/orders}" class="btn btn-primary">Quản lý đơn hàng</a>
+<body class="admin-bg">
+<div th:replace="~{fragments/admin-menu :: menu}"></div>
+<main class="container py-4 py-lg-5">
+    <section class="admin-hero mb-4">
+        <div class="small text-uppercase fw-semibold opacity-75 mb-2">Khu vực dành cho nhân viên</div>
+        <h1 class="fw-bold mb-2">Dashboard</h1>
+        <p class="mb-0 opacity-75">Tổng quan tình hình đơn hàng và công việc tại cửa hàng.</p>
+    </section>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-3">
+            <a class="admin-stat d-block text-decoration-none" th:href="@{/staff/orders}">
+                <div class="admin-stat-label">Tổng đơn hàng</div>
+                <div class="admin-stat-number" th:text="${totalOrders}">0</div>
+                <small class="text-secondary">Xem danh sách đơn hàng</small>
+            </a>
+        </div>
+        <div class="col-6 col-xl-3">
+            <a class="admin-stat d-block text-decoration-none" th:href="@{/staff/orders}">
+                <div class="admin-stat-label">Chờ xác nhận</div>
+                <div class="admin-stat-number text-warning" th:text="${pendingOrders}">0</div>
+                <small class="text-secondary">Đơn cần xử lý</small>
+            </a>
+        </div>
+        <div class="col-6 col-xl-3">
+            <a class="admin-stat d-block text-decoration-none" th:href="@{/staff/orders}">
+                <div class="admin-stat-label">Đã xác nhận</div>
+                <div class="admin-stat-number text-primary" th:text="${confirmedOrders}">0</div>
+                <small class="text-secondary">Đơn đã xác nhận</small>
+            </a>
+        </div>
+        <div class="col-6 col-xl-3">
+            <a class="admin-stat d-block text-decoration-none" th:href="@{/staff/orders}">
+                <div class="admin-stat-label">Đang xử lý</div>
+                <div class="admin-stat-number" th:text="${processingOrders}">0</div>
+                <small class="text-secondary">Đơn đang chuẩn bị</small>
+            </a>
+        </div>
+        <div class="col-6 col-xl-3">
+            <a class="admin-stat d-block text-decoration-none" th:href="@{/staff/orders}">
+                <div class="admin-stat-label">Đang giao</div>
+                <div class="admin-stat-number text-info" th:text="${shippingOrders}">0</div>
+                <small class="text-secondary">Đơn đang vận chuyển</small>
+            </a>
+        </div>
+        <div class="col-6 col-xl-3">
+            <a class="admin-stat d-block text-decoration-none" th:href="@{/staff/orders}">
+                <div class="admin-stat-label">Hoàn thành</div>
+                <div class="admin-stat-number text-success" th:text="${completedOrders}">0</div>
+                <small class="text-secondary">Đơn đã hoàn tất</small>
+            </a>
+        </div>
+        <div class="col-6 col-xl-3">
+            <a class="admin-stat d-block text-decoration-none" th:href="@{/staff/orders}">
+                <div class="admin-stat-label">Đã hủy</div>
+                <div class="admin-stat-number text-danger" th:text="${cancelledOrders}">0</div>
+                <small class="text-secondary">Đơn đã hủy</small>
+            </a>
+        </div>
     </div>
+
+    <h4 class="fw-semibold mb-3">Truy cập nhanh</h4>
     <div class="row g-3">
-        <div class="col-6 col-lg-4"><div class="card h-100 border-primary"><div class="card-body"><p class="text-muted">Tổng đơn hàng</p><h2 th:text="${totalOrders}"></h2></div></div></div>
-        <div class="col-6 col-lg-4"><div class="card h-100 border-warning"><div class="card-body"><p class="text-muted">Chờ xác nhận</p><h2 th:text="${pendingOrders}"></h2></div></div></div>
-        <div class="col-6 col-lg-4"><div class="card h-100 border-info"><div class="card-body"><p class="text-muted">Đã xác nhận</p><h2 th:text="${confirmedOrders}"></h2></div></div></div>
-        <div class="col-6 col-lg-4"><div class="card h-100 border-primary"><div class="card-body"><p class="text-muted">Đang xử lý</p><h2 th:text="${processingOrders}"></h2></div></div></div>
-        <div class="col-6 col-lg-4"><div class="card h-100 border-secondary"><div class="card-body"><p class="text-muted">Đang giao</p><h2 th:text="${shippingOrders}"></h2></div></div></div>
-        <div class="col-6 col-lg-4"><div class="card h-100 border-success"><div class="card-body"><p class="text-muted">Hoàn thành</p><h2 th:text="${completedOrders}"></h2></div></div></div>
-        <div class="col-6 col-lg-4"><div class="card h-100 border-danger"><div class="card-body"><p class="text-muted">Đã hủy</p><h2 th:text="${cancelledOrders}"></h2></div></div></div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <a class="admin-quick" th:href="@{/staff/orders}">
+                <span class="h5 d-block">Quản lý đơn hàng</span>
+                <small>Xem chi tiết, xác nhận và cập nhật trạng thái đơn hàng</small>
+            </a>
+        </div>
     </div>
 </main>
 </body>

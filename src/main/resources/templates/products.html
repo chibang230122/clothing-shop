@@ -14,6 +14,14 @@
     </div>
 </div>
 
+<style>
+    .product-card-link { display:block; height:100%; color:inherit; text-decoration:none; }
+    .product-card-link .card { transition:transform .18s ease, box-shadow .18s ease; }
+    .product-card-link:hover .card { transform:translateY(-4px); box-shadow:0  .75rem 1.5rem rgba(0,0,0,.12)!important; }
+    .product-card-link:hover .card-title { color:#dc3545; }
+    .product-card-link:focus-visible { outline:3px solid #0d6efd; outline-offset:4px; border-radius:12px; }
+</style>
+
 <main class="container py-5">
 
     <!-- TÌM KIẾM VÀ LỌC -->
@@ -29,14 +37,6 @@
                                class="form-control"
                                placeholder="Nhập tên sản phẩm..."
                                th:value="${keyword}">
-                    </div>
-
-                    <div class="col-12 col-md-6 col-lg-4">
-                        <label for="sku" class="form-label">Mã SKU</label>
-                        <input type="text" id="sku" name="sku"
-                               class="form-control"
-                               placeholder="Nhập mã SKU..."
-                               th:value="${sku}">
                     </div>
 
                     <div class="col-12 col-md-6 col-lg-4">
@@ -138,6 +138,7 @@
         <div class="col-6 col-md-4 col-lg-3"
              th:each="product : ${products}">
 
+            <a class="product-card-link" th:href="@{/products/{id}(id=${product.productId})}">
             <div class="card h-100 border-0 shadow-sm">
                 <img th:if="${product.imageUrl != null and !#strings.isEmpty(product.imageUrl)}"
                      th:src="${product.imageUrl}"
@@ -166,32 +167,9 @@
                         Mô tả sản phẩm
                     </p>
 
-                    <div class="mt-auto d-grid gap-2">
-                        <div class="row g-2" sec:authorize="!hasAnyRole('ADMIN', 'STAFF')">
-                            <div class="col-6">
-                                <form th:action="@{/cart/add}" method="post" class="m-0">
-                                    <input type="hidden" name="productId" th:value="${product.productId}">
-                                    <input type="hidden" name="quantity" value="1">
-                                    <button type="submit" class="btn btn-outline-dark btn-sm w-100">
-                                        Thêm vào giỏ
-                                    </button>
-                                </form>
-                            </div>
-                            <div class="col-6">
-                                <a class="btn btn-danger btn-sm w-100 fw-semibold"
-                                   th:href="@{/products/{id}(id=${product.productId}, buyNow=true)}">
-                                    Mua ngay
-                                </a>
-                            </div>
-                        </div>
-
-                        <a class="btn btn-dark btn-sm w-100"
-                           th:href="@{/products/{id}(id=${product.productId})}">
-                            Xem chi tiết
-                        </a>
-                    </div>
                 </div>
             </div>
+            </a>
         </div>
     </div>
 
