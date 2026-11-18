@@ -45,6 +45,18 @@ Test tự động không cần database: `ShopSocketServerTests`, `BoundedLineRe
 | SK-10 | Server bật token | Chưa `AUTH` thì `UNAUTHORIZED`; sai token thì `AUTH_FAILED`; đúng token thì dùng được; kết nối mới phải `AUTH` lại | `authToken_isRequiredForBusinessCommands` | **[ĐIỀN]** |
 | SK-11 | Tắt server | Đóng toàn bộ kết nối, không còn nhận kết nối mới | `stop_closesEverything` | **[ĐIỀN]** |
 
+## 4.x.3b Kiểm thử tồn kho khi hủy và xác nhận đơn (phối hợp thành viên 4)
+
+Test tự động: `OrderStockConcurrencyTests` (SQL Server thật, Socket dùng cổng ngẫu nhiên). Nguyên tắc kiểm tra ở mọi kịch bản: tồn kho còn lại = tồn kho ban đầu - tổng số lượng của các đơn chưa bị hủy, và không bao giờ âm. Cơ chế bảo đảm nằm ở `OrderCancellationService` và `OrderManagementService`: cả hai khóa dòng đơn hàng bằng `PESSIMISTIC_WRITE` rồi mới kiểm tra trạng thái.
+
+| Mã | Kịch bản | Kết quả mong đợi | Test | Kết quả thực tế |
+|---|---|---|---|---|
+| TK-01 | 6 luồng cùng hủy một đơn | Đúng 1 lần hủy thành công, 5 lần bị từ chối; kho hoàn đúng 1 lần; Socket báo CANCELLED | `cancelSameOrderFromManyThreads_restoresStockExactlyOnce` | **[ĐIỀN]** |
+| TK-02 | Khách hủy và Staff xác nhận cùng một đơn, cùng lúc (10 vòng) | Mỗi vòng chỉ một bên thắng; trạng thái cuối và tồn kho nhất quán; Socket khớp database | `customerCancelVersusStaffConfirm_exactlyOneWins_andStockStaysConsistent` | **[ĐIỀN]** (ghi số vòng mỗi bên thắng từ dòng log `[TEST] TK-02`) |
+| TK-03 | Hủy đơn trong lúc 2 khách khác mua đúng món vừa được hoàn (5 vòng) | Tồn kho không âm; kho = ban đầu - số đơn B/C thành công; Socket khớp | `cancelWhileOthersBuyTheSameItem_stockNeverNegative_andConserved` | **[ĐIỀN]** |
+| TK-04 | Staff chuyển đơn qua CONFIRMED, PROCESSING, SHIPPING, COMPLETED; khách thử hủy sau cùng | Socket báo đúng từng trạng thái; hủy bị từ chối; kho không đổi | `socketOrderStatus_followsStaffWorkflow_andLaterCancelIsRejected` | **[ĐIỀN]** |
+| TK-05 | Tài khoản STAFF, ADMIN thử đặt hàng | Bị chặn (`AccessDeniedException`); không có đơn; kho không đổi | `adminAndStaffCannotCheckout_stockUnchanged` | **[ĐIỀN]** |
+
 ## 4.x.4 Demo 3 Client
 
 Thực hiện theo `docs/DEMO_SOCKET_3_CLIENTS.md`. Chèn vào báo cáo:
