@@ -107,7 +107,43 @@ CREATE TABLE CartItems (
                            CONSTRAINT FK_CartItems_Carts FOREIGN KEY (CartId) REFERENCES Carts(CartId),
                            CONSTRAINT FK_CartItems_ProductVariants FOREIGN KEY (VariantId) REFERENCES ProductVariants(VariantId)
 );
+CREATE TABLE ImportReceipts (
+                                ImportReceiptId INT IDENTITY(1,1) PRIMARY KEY,
+                                ImportDate DATETIME2(0) NOT NULL
+        DEFAULT SYSDATETIME(),
+                                TotalAmount DECIMAL(18,2) NOT NULL
+                                    DEFAULT 0 CHECK (TotalAmount >= 0),
+                                Note NVARCHAR(500) NULL,
+                                CreatedBy INT NOT NULL,
+
+                                CONSTRAINT FK_ImportReceipts_Users
+                                    FOREIGN KEY (CreatedBy)
+                                        REFERENCES Users(UserId)
+);
+
+CREATE TABLE ImportReceiptDetails (
+                                      ImportDetailId INT IDENTITY(1,1) PRIMARY KEY,
+                                      ImportReceiptId INT NOT NULL,
+                                      VariantId INT NOT NULL,
+                                      Quantity INT NOT NULL CHECK (Quantity > 0),
+                                      ImportPrice DECIMAL(18,2) NOT NULL
+                                          CHECK (ImportPrice >= 0),
+                                      Subtotal DECIMAL(18,2) NOT NULL
+                                          CHECK (Subtotal >= 0),
+
+                                      CONSTRAINT CK_ImportReceiptDetails_Subtotal
+                                          CHECK (Subtotal = Quantity * ImportPrice),
+
+                                      CONSTRAINT FK_ImportReceiptDetails_Receipts
+                                          FOREIGN KEY (ImportReceiptId)
+                                              REFERENCES ImportReceipts(ImportReceiptId),
+
+                                      CONSTRAINT FK_ImportReceiptDetails_Variants
+                                          FOREIGN KEY (VariantId)
+                                              REFERENCES ProductVariants(VariantId)
+);
 GO
+
 
 CREATE INDEX IX_Users_RoleId ON Users(RoleId);
 CREATE INDEX IX_Products_CategoryId_IsActive ON Products(CategoryId, IsActive);
@@ -120,6 +156,9 @@ CREATE INDEX IX_Orders_OrderStatus_OrderDate ON Orders(OrderStatus, OrderDate DE
 CREATE INDEX IX_OrderItems_OrderId ON OrderItems(OrderId);
 CREATE INDEX IX_OrderItems_VariantId ON OrderItems(VariantId);
 CREATE INDEX IX_CartItems_VariantId ON CartItems(VariantId);
+CREATE INDEX IX_ImportReceipts_ImportDate ON ImportReceipts(ImportDate);
+CREATE INDEX IX_ImportReceiptDetails_ReceiptId ON ImportReceiptDetails(ImportReceiptId);
+CREATE INDEX IX_ImportReceiptDetails_VariantId ON ImportReceiptDetails(VariantId);
 GO
 
 INSERT INTO Roles (RoleName) VALUES (N'ADMIN'),(N'STAFF'),(N'CUSTOMER');
@@ -264,5 +303,7 @@ UNION ALL SELECT 'Orders',COUNT(*) FROM Orders
 UNION ALL SELECT 'OrderItems',COUNT(*) FROM OrderItems
 UNION ALL SELECT 'Carts',COUNT(*) FROM Carts
 UNION ALL SELECT 'CartItems',COUNT(*) FROM CartItems
+UNION ALL SELECT 'ImportReceipts', COUNT(*) FROM ImportReceipts
+UNION ALL SELECT 'ImportReceiptDetails', COUNT(*) FROM ImportReceiptDetails
 ORDER BY TableName;
 GO
