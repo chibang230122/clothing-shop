@@ -8,7 +8,7 @@ import com.example.clothingshop.service.AccountService;
 import jakarta.validation.Valid;
 
 import java.security.Principal;
-import java.nio.charset.StandardCharsets;
+import com.example.clothingshop.service.PasswordPolicy;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -89,14 +89,8 @@ public class AccountController {
             );
         }
 
-        if (form.getNewPassword() != null
-                && form.getNewPassword()
-                .getBytes(StandardCharsets.UTF_8).length > 72) {
-            result.rejectValue(
-                    "newPassword",
-                    "tooLong",
-                    "Mật khẩu vượt quá giới hạn BCrypt"
-            );
+        if (!result.hasFieldErrors("newPassword") && !PasswordPolicy.accepts(form.getNewPassword())) {
+            result.rejectValue("newPassword", "policy", PasswordPolicy.GUIDE);
         }
 
         if (result.hasErrors()) {

@@ -5,6 +5,21 @@
         class="btn btn-outline-secondary" data-password-toggle
         th:attr="aria-controls=${inputId}" aria-label="Hiện mật khẩu">Hiện</button>
 
+<div th:fragment="googleButton(label)" class="mb-3">
+    <a th:if="${googleEnabled}" th:href="@{/oauth2/authorization/google}"
+       class="btn btn-light border rounded-pill w-100">
+        <img th:src="@{/images/google-g.png}" width="20" height="20" alt="" class="me-2">
+        <span th:text="${label}"></span>
+    </a>
+    <details th:unless="${googleEnabled}">
+        <summary class="btn btn-light border rounded-pill w-100">
+            <img th:src="@{/images/google-g.png}" width="20" height="20" alt="" class="me-2">
+            <span th:text="${label}"></span>
+        </summary>
+        <p class="text-muted small mt-2 mb-0">Cửa hàng chưa bật xác thực Google. Bạn có thể tiếp tục bằng email bên dưới.</p>
+    </details>
+</div>
+
 <a th:fragment="identity(cssClass)" th:if="${signedInAccount != null}"
    th:class="${cssClass}" th:classappend="${currentPath == '/account/profile'} ? ' active fw-bold text-warning border-bottom border-2 border-warning' : ''"
    th:href="@{/account/profile}">
@@ -13,7 +28,7 @@
         <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
         <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
     </svg>
-   <span th:text="|${signedInAccount.fullName} · ${signedInAccount.role}|">Hồ sơ</span>
+    <span th:text="|${signedInAccount.fullName} · ${signedInAccount.role}|">Hồ sơ</span>
 </a>
 </body>
 </html>

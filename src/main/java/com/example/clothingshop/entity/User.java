@@ -40,6 +40,11 @@ public class User {
     @Column(name = "CreatedAt", nullable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "GoogleSubject", length = 255)
+    private String googleSubject;
+
+    public void setGoogleSubject(String value) { googleSubject = value; }
+
     public User() {
     }
 

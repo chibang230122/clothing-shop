@@ -130,6 +130,7 @@ public class PasswordResetService {
     }
 
     public boolean resetPassword(String email, String sessionId, String code, String newPassword) {
+        PasswordPolicy.require(newPassword);
         Challenge challenge = consumeCode(email, sessionId, code);
         if (challenge == null) {
             return false;
@@ -143,7 +144,9 @@ public class PasswordResetService {
         }
 
         for (Object principal : sessions.getAllPrincipals()) {
-            if (principal instanceof UserDetails user && email.equalsIgnoreCase(user.getUsername())) {
+            if ((principal instanceof UserDetails user && email.equalsIgnoreCase(user.getUsername()))
+                    || (principal instanceof org.springframework.security.oauth2.core.oidc.user.OidcUser google
+                    && email.equalsIgnoreCase(google.getName()))) {
                 sessions.getAllSessions(principal, false).forEach(session -> session.expireNow());
             }
         }

@@ -22,9 +22,6 @@ public class RegisterForm {
     @Size(max = 300, message = "Địa chỉ quá dài")
     private String address;
 
-    @NotBlank(message = "Vui lòng nhập mật khẩu")
-    @Size(min = 8, max = 50,
-            message = "Mật khẩu phải có từ 8 đến 50 ký tự")
     private String password;
 
     @NotBlank(message = "Vui lòng xác nhận mật khẩu")

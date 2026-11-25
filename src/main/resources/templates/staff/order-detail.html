@@ -44,6 +44,16 @@
             <h5>Tổng cộng: <span class="text-danger" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span></h5>
         </div>
     </div></div>
+    <section class="card mt-3"><div class="card-body">
+        <h5>Xuất hóa đơn</h5>
+        <form id="invoice-email" method="post" th:action="@{/api/invoices/{id}/email(id=${order.orderId})}">
+            <p>Gửi đến <strong th:text="${order.user.email}"></strong></p>
+            <a class="btn btn-outline-primary" th:href="@{/api/invoices/{id}(id=${order.orderId})}">Tải hóa đơn HTML</a>
+            <button type="submit" class="btn btn-primary">Gửi hóa đơn qua email</button>
+            <p class="mt-2 mb-0" role="status" aria-live="polite"></p>
+        </form>
+    </div></section>
+    <script defer th:src="@{/js/invoice-email.js}"></script>
 </main>
 </body>
 </html>

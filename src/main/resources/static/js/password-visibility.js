@@ -14,3 +14,17 @@ document.addEventListener("click", (event) => {
     button.textContent = show ? "Ẩn" : "Hiện";
     button.setAttribute("aria-label", show ? "Ẩn mật khẩu" : "Hiện mật khẩu");
 });
+
+for (const input of document.querySelectorAll("[data-password-rule]")) {
+    const validate = () => {
+        const value = input.value;
+        const valid = value.length >= 8 && value.length <= 50
+            && /\p{Lu}/u.test(value) && /\p{Ll}/u.test(value)
+            && /\p{Nd}/u.test(value) && /[\p{P}\p{S}]/u.test(value)
+            && new TextEncoder().encode(value).length <= 72;
+        input.setCustomValidity(valid ? "" : input.dataset.passwordRule);
+    };
+    input.addEventListener("input", validate);
+    input.addEventListener("change", validate);
+    input.addEventListener("invalid", validate);
+}

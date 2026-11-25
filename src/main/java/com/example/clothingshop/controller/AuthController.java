@@ -4,6 +4,9 @@ import com.example.clothingshop.dto.RegisterForm;
 import com.example.clothingshop.service.AuthService;
 
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import com.example.clothingshop.service.PasswordPolicy;
 
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -16,9 +19,17 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final ObjectProvider<ClientRegistrationRepository> clients;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, ObjectProvider<ClientRegistrationRepository> clients) {
         this.authService = authService;
+        this.clients = clients;
+    }
+
+    @ModelAttribute("googleEnabled")
+    public boolean googleEnabled() {
+        ClientRegistrationRepository registrations = clients.getIfAvailable();
+        return registrations != null && registrations.findByRegistrationId("google") != null;
     }
 
     @GetMapping("/login")
@@ -53,6 +64,10 @@ public class AuthController {
                     "mismatch",
                     "Mật khẩu xác nhận không khớp"
             );
+        }
+
+        if (!result.hasFieldErrors("password") && !PasswordPolicy.accepts(form.getPassword())) {
+            result.rejectValue("password", "policy", PasswordPolicy.GUIDE);
         }
 
         if (result.hasErrors()) {

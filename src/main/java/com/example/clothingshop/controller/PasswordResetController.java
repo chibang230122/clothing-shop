@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.nio.charset.StandardCharsets;
+import com.example.clothingshop.service.PasswordPolicy;
 import java.security.Principal;
 import java.util.Locale;
 
@@ -86,9 +86,8 @@ public class PasswordResetController {
         }
 
         String error;
-        if (newPassword.isBlank() || newPassword.length() < 8 || newPassword.length() > 50
-                || newPassword.getBytes(StandardCharsets.UTF_8).length > 72) {
-            error = "Mật khẩu mới phải có 8–50 ký tự và tối đa 72 byte UTF-8.";
+        if (!PasswordPolicy.accepts(newPassword)) {
+            error = PasswordPolicy.GUIDE;
         } else if (!newPassword.equals(confirmPassword)) {
             error = "Mật khẩu xác nhận không khớp.";
         } else if (!otp.matches("[0-9]{6}") || !passwordReset.resetPassword(email, session.getId(), otp, newPassword)) {

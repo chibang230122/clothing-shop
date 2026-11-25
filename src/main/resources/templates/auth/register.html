@@ -10,6 +10,7 @@
 
             <h3 class="text-center mb-4">Đăng ký khách hàng</h3>
 
+            <div th:replace="~{fragments/account-controls :: googleButton('Đăng ký bằng Google')}"></div>
             <form th:action="@{/register}"
                   th:object="${form}"
                   method="post">
@@ -51,10 +52,11 @@
                 <div class="mb-3">
                     <label for="password">Mật khẩu</label>
                     <div class="input-group">
-                        <input id="password" name="password"
+                        <input th:attr="data-password-rule=${passwordRule}"
+                               id="password" name="password"
                                type="password"
                                class="form-control"
-                               minlength="8" maxlength="50"
+                               minlength="8"
                                autocomplete="new-password"
                                required>
                         <button th:replace="~{fragments/account-controls :: passwordToggle('password')}"></button>

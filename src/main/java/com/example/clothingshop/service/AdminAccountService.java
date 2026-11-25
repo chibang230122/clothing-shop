@@ -36,15 +36,15 @@ public class AdminAccountService {
     }
 
     @Transactional(readOnly = true)
-    public User getCustomer(Integer id) {
+    public User getEditableProfile(Integer id) {
         return users.findById(id)
-                .filter(user -> "CUSTOMER".equals(user.getRole().getRoleName()))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy khách hàng"));
+                .filter(user -> EDITABLE_ROLES.contains(user.getRole().getRoleName()))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy tài khoản có thể chỉnh sửa"));
     }
 
     @Transactional
-    public void updateCustomer(Integer id, ProfileForm form) {
-        AccountService.applyProfile(getCustomer(id), form);
+    public void updateProfile(Integer id, ProfileForm form) {
+        AccountService.applyProfile(getEditableProfile(id), form);
     }
 
     @Transactional
