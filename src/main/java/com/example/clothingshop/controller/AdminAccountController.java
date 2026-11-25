@@ -1,6 +1,9 @@
 package com.example.clothingshop.controller;
 
 import com.example.clothingshop.dto.ProfileForm;
+import com.example.clothingshop.dto.RegisterForm;
+import com.example.clothingshop.service.AuthService;
+import com.example.clothingshop.service.PasswordPolicy;
 import com.example.clothingshop.entity.User;
 import com.example.clothingshop.service.AdminAccountService;
 import jakarta.validation.Valid;
@@ -19,8 +22,11 @@ public class AdminAccountController {
 
     private final AdminAccountService accountService;
 
+    private final AuthService authService;
+
     public AdminAccountController(
-            AdminAccountService accountService) {
+            AdminAccountService accountService, AuthService authService) {
+        this.authService = authService;
         this.accountService = accountService;
     }
 
@@ -44,9 +50,36 @@ public class AdminAccountController {
         return "admin/accounts";
     }
 
+    @GetMapping("/staff/new")
+    public String newStaff(Model model) {
+        model.addAttribute("form", new RegisterForm());
+        return "admin/staff-create";
+    }
+
+    @PostMapping("/staff/new")
+    public String createStaff(@Valid @ModelAttribute("form") RegisterForm form, BindingResult errors,
+                              RedirectAttributes redirect) {
+        if (!PasswordPolicy.accepts(form.getPassword())) {
+            errors.rejectValue("password", "policy", PasswordPolicy.GUIDE);
+        }
+        if (form.getPassword() != null && !form.getPassword().equals(form.getConfirmPassword())) {
+            errors.rejectValue("confirmPassword", "mismatch", "Mật khẩu xác nhận không khớp");
+        }
+        if (errors.hasErrors()) return "admin/staff-create";
+
+        try {
+            authService.createStaff(form);
+        } catch (IllegalArgumentException ex) {
+            errors.rejectValue("email", "registrationError", ex.getMessage());
+            return "admin/staff-create";
+        }
+        redirect.addFlashAttribute("success", "Đã tạo tài khoản nhân viên.");
+        return "redirect:/admin/accounts";
+    }
+
     @GetMapping("/{id}/edit")
     public String editCustomer(@PathVariable Integer id, Model model) {
-        User customer = accountService.getCustomer(id);
+        User customer = accountService.getEditableProfile(id);
         model.addAttribute("customerEmail", customer.getEmail());
         model.addAttribute("customerId", id);
         model.addAttribute("form", new ProfileForm(customer.getFullName(), customer.getPhone(), customer.getAddress()));
@@ -57,12 +90,12 @@ public class AdminAccountController {
     public String updateCustomer(@PathVariable Integer id, @Valid @ModelAttribute("form") ProfileForm form,
                                  BindingResult errors, Model model, RedirectAttributes redirect) {
         if (errors.hasErrors()) {
-            model.addAttribute("customerEmail", accountService.getCustomer(id).getEmail());
+            model.addAttribute("customerEmail", accountService.getEditableProfile(id).getEmail());
             model.addAttribute("customerId", id);
             return "admin/customer-edit";
         }
-        accountService.updateCustomer(id, form);
-        redirect.addFlashAttribute("success", "Đã cập nhật thông tin khách hàng.");
+        accountService.updateProfile(id, form);
+        redirect.addFlashAttribute("success", "Đã cập nhật thông tin tài khoản.");
         return "redirect:/admin/accounts";
     }
 

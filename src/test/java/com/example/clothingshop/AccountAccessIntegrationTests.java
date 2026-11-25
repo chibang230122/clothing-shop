@@ -174,8 +174,25 @@ class AccountAccessIntegrationTests {
         assertTrue(updated.getIsActive());
         User staff = users.findByEmailIgnoreCase(email("STAFF")).orElseThrow();
         mvc.perform(post("/admin/accounts/" + staff.getUserId() + "/edit")
-                        .session(admin).with(csrf()).param("fullName", "Denied"))
-                .andExpect(status().isNotFound());
+                        .session(admin).with(csrf()).param("fullName", "Updated Staff"))
+                .andExpect(redirectedUrl("/admin/accounts"));
+        assertEquals("Updated Staff", users.findById(staff.getUserId()).orElseThrow().getFullName());
+        staff.setFullName("STAFF Test");
+        users.save(staff);
+    }
+
+    @Test
+    void adminCanCreateStaffWhoCanSignIn() throws Exception {
+        var admin = signIn(email("ADMIN"), PASSWORD);
+        String path = "/admin/accounts/staff/new";
+        mvc.perform(get(path).session(admin)).andExpect(status().isOk());
+        mvc.perform(post(path).session(admin).with(csrf()).param("fullName", "New Staff")
+                        .param("email", "newstaff@example.test").param("password", PASSWORD)
+                        .param("confirmPassword", PASSWORD).param("roleName", "ADMIN"))
+                .andExpect(redirectedUrl("/admin/accounts"));
+        var staff = users.findByEmailIgnoreCase("newstaff@example.test").orElseThrow();
+        assertEquals("STAFF", staff.getRole().getRoleName());
+        mvc.perform(get("/staff/orders").session(signIn(staff.getEmail(), PASSWORD))).andExpect(status().isOk());
     }
 
     @Test
@@ -236,6 +253,25 @@ class AccountAccessIntegrationTests {
 
         var order = orders.findAll().get(0);
         assertEquals("buyer@example.test", order.getUser().getEmail());
+        MockHttpSession staff = signIn(email("STAFF"), PASSWORD);
+        String invoiceUrl = "/api/invoices/" + order.getOrderId();
+        byte[] document = mvc.perform(get(invoiceUrl).session(staff))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Áo kiểm thử")))
+                .andExpect(content().string(containsString(order.getOrderCode())))
+                .andReturn().getResponse().getContentAsByteArray();
+        mvc.perform(post(invoiceUrl + "/email").session(staff)).andExpect(status().isForbidden());
+        var message = new jakarta.mail.internet.MimeMessage((jakarta.mail.Session) null);
+        org.mockito.Mockito.when(mailSender.createMimeMessage()).thenReturn(message);
+        mvc.perform(post(invoiceUrl + "/email").session(staff).with(csrf())
+                .param("email", "another@example.test")).andExpect(status().isOk());
+        verify(mailSender).send(message);
+        assertEquals("buyer@example.test", message.getAllRecipients()[0].toString());
+        message.saveChanges();
+        var multipart = (jakarta.mail.Multipart) message.getContent();
+        var file = multipart.getBodyPart(multipart.getCount() - 1);
+        assertEquals("hoa-don-" + order.getOrderId() + ".html", file.getFileName());
+        assertArrayEquals(document, file.getInputStream().readAllBytes());
         assertEquals(4, variants.findById(variant.getVariantId()).orElseThrow().getStockQuantity());
         mvc.perform(get("/account/orders/" + order.getOrderId()).session(buyer)).andExpect(status().isOk());
         mvc.perform(get("/account/orders/" + order.getOrderId()).session(signIn(email("CUSTOMER"), PASSWORD)))
@@ -248,6 +284,41 @@ class AccountAccessIntegrationTests {
                 .param("recipientName", "Người nhận kiểm thử")
                 .param("recipientPhone", "0901234567").param("shippingAddress", "Trà Vinh")
                 .param("paymentMethod", "COD");
+    }
+
+    @Test
+    void googleOptionsRemainVisibleAndPasswordErrorAppearsAfterSubmit() throws Exception {
+        mvc.perform(get("/login")).andExpect(content().string(containsString("Đăng nhập bằng Google")));
+        var page = mvc.perform(get("/register")).andExpect(status().isOk())
+                .andExpect(content().string(containsString("Đăng ký bằng Google")))
+                .andReturn().getResponse();
+        String guide = com.example.clothingshop.service.PasswordPolicy.GUIDE;
+        assertFalse(page.getContentAsString(java.nio.charset.StandardCharsets.UTF_8)
+                .replaceAll("<[^>]+>", "").contains(guide));
+        for (String password : java.util.List.of("", "Ab1!", "LowercaseOnly")) {
+            mvc.perform(post("/register").with(csrf()).param("fullName", "Test")
+                            .param("email", "test@example.test").param("password", password)
+                            .param("confirmPassword", password))
+                    .andExpect(model().attributeHasFieldErrors("form", "password"))
+                    .andExpect(content().string(containsString(">" + guide + "</small>")));
+        }
+    }
+
+    @Test
+    void allPasswordFormsRejectAWeakNewPassword() throws Exception {
+        String weak = "alllowercase";
+        mvc.perform(post("/register").with(csrf()).param("email", "weak@example.test")
+                        .param("fullName", "Khách thử").param("password", weak).param("confirmPassword", weak))
+                .andExpect(model().attributeHasFieldErrors("form", "password"));
+        assertFalse(users.existsByEmailIgnoreCase("weak@example.test"));
+        mvc.perform(post("/account/change-password").with(csrf()).session(signIn(email("STAFF"), PASSWORD))
+                        .param("currentPassword", PASSWORD).param("newPassword", weak).param("confirmPassword", weak))
+                .andExpect(model().attributeHasFieldErrors("form", "newPassword"));
+        MockHttpSession pending = new MockHttpSession();
+        pending.setAttribute("com.example.clothingshop.controller.PasswordResetController.email", "reset@example.test");
+        mvc.perform(post("/reset-password").with(csrf()).session(pending).param("otp", "000000")
+                        .param("newPassword", weak).param("confirmPassword", weak))
+                .andExpect(model().attribute("error", com.example.clothingshop.service.PasswordPolicy.GUIDE));
     }
 
     @Test
@@ -318,7 +389,7 @@ class AccountAccessIntegrationTests {
         if (route.startsWith("/admin")) {
             return role.equals("ADMIN");
         }
-        if (route.startsWith("/staff")) {
+        if (route.startsWith("/staff") || route.startsWith("/api/invoices")) {
             return role.equals("ADMIN") || role.equals("STAFF");
         }
         if (route.startsWith("/cart") || route.startsWith("/checkout") || route.startsWith("/account/orders")) {

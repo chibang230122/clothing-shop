@@ -9,7 +9,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.charset.StandardCharsets;
 
 @Service
 public class AccountService {
@@ -65,13 +64,7 @@ public class AccountService {
             );
         }
 
-        if (newPassword.getBytes(
-                StandardCharsets.UTF_8).length > 72) {
-
-            throw new IllegalArgumentException(
-                    "Mật khẩu mới vượt quá giới hạn BCrypt"
-            );
-        }
+        PasswordPolicy.require(newPassword);
 
         user.setPasswordHash(
                 passwordEncoder.encode(newPassword)

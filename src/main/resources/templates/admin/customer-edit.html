@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/header :: header('Chỉnh sửa thông tin khách hàng')}">
+<head th:replace="~{fragments/header :: header('Chỉnh sửa thông tin tài khoản')}">
 </head>
 <body class="bg-light">
 
@@ -10,7 +10,7 @@
     <div class="card shadow-sm mx-auto" style="max-width:600px">
         <div class="card-body p-4">
 
-            <h3 class="mb-4">Chỉnh sửa thông tin khách hàng</h3>
+            <h3 class="mb-4">Chỉnh sửa thông tin tài khoản</h3>
 
             <form th:action="@{/admin/accounts/{id}/edit(id=${customerId})}"
                   th:object="${form}" method="post">

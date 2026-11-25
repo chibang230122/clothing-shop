@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Tạo tài khoản nhân viên')}">
+</head>
+<body class="bg-light">
+<div th:replace="~{fragments/admin-menu :: menu}"></div>
+
+<div class="container py-5">
+    <div class="card shadow-sm mx-auto" style="max-width:540px">
+        <div class="card-body p-4">
+
+            <h3 class="text-center mb-4">Tạo tài khoản nhân viên</h3>
+
+            <form th:action="@{/admin/accounts/staff/new}"
+                  th:object="${form}"
+                  method="post">
+
+                <div class="mb-3">
+                    <label>Họ và tên</label>
+                    <input th:field="*{fullName}"
+                           class="form-control"
+                           maxlength="100" required>
+                    <small class="text-danger"
+                           th:errors="*{fullName}"></small>
+                </div>
+
+                <div class="mb-3">
+                    <label>Email</label>
+                    <input th:field="*{email}"
+                           type="email" class="form-control"
+                           maxlength="150" required>
+                    <small class="text-danger"
+                           th:errors="*{email}"></small>
+                </div>
+
+                <div class="mb-3">
+                    <label>Số điện thoại</label>
+                    <input th:field="*{phone}"
+                           class="form-control" maxlength="20">
+                    <small class="text-danger"
+                           th:errors="*{phone}"></small>
+                </div>
+
+                <div class="mb-3">
+                    <label>Địa chỉ</label>
+                    <input th:field="*{address}"
+                           class="form-control" maxlength="300">
+                    <small class="text-danger"
+                           th:errors="*{address}"></small>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password">Mật khẩu</label>
+                    <div class="input-group">
+                        <input th:attr="data-password-rule=${passwordRule}"
+                               id="password" name="password"
+                               type="password"
+                               class="form-control"
+                               minlength="8"
+                               autocomplete="new-password"
+                               required>
+                        <button th:replace="~{fragments/account-controls :: passwordToggle('password')}"></button>
+                    </div>
+                    <small class="text-danger"
+                           th:errors="*{password}"></small>
+                </div>
+
+                <div class="mb-3">
+                    <label for="confirmPassword">Xác nhận mật khẩu</label>
+                    <div class="input-group">
+                        <input id="confirmPassword" name="confirmPassword"
+                               type="password"
+                               class="form-control"
+                               autocomplete="new-password"
+                               required>
+                        <button th:replace="~{fragments/account-controls :: passwordToggle('confirmPassword')}"></button>
+                    </div>
+                    <small class="text-danger"
+                           th:errors="*{confirmPassword}"></small>
+                </div>
+
+                <input type="hidden"
+                       th:name="${_csrf.parameterName}"
+                       th:value="${_csrf.token}">
+
+                <button class="btn btn-dark w-100" type="submit">
+                    Tạo tài khoản
+                </button>
+            </form>
+
+            <a th:href="@{/admin/accounts}" class="btn btn-outline-secondary w-100 mt-3">
+                Quay lại quản lý tài khoản
+            </a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

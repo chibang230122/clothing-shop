@@ -1,6 +1,7 @@
 package com.example.clothingshop.controller;
 
 import com.example.clothingshop.repository.UserRepository;
+import com.example.clothingshop.service.PasswordPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -12,6 +13,11 @@ public class AccountNavigationAdvice {
 
     public AccountNavigationAdvice(UserRepository users) {
         this.users = users;
+    }
+
+    @ModelAttribute("passwordRule")
+    public String passwordRule() {
+        return PasswordPolicy.GUIDE;
     }
 
     @ModelAttribute("signedInAccount")

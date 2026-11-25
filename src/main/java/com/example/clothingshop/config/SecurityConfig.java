@@ -1,6 +1,9 @@
 package com.example.clothingshop.config;
 
 import com.example.clothingshop.service.CustomUserDetailsService;
+import org.springframework.beans.factory.ObjectProvider;
+import com.example.clothingshop.service.GoogleLoginService;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.DisabledException;
@@ -50,7 +53,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http, AuthenticationProvider authenticationProvider,
-            CustomUserDetailsService userDetailsService, SessionRegistry sessions) throws Exception {
+            CustomUserDetailsService userDetailsService, SessionRegistry sessions,
+            ObjectProvider<GoogleLoginService> google,
+            ObjectProvider<ClientRegistrationRepository> clients) throws Exception {
         http.authenticationProvider(authenticationProvider)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/products", "/products/**", "/login", "/register",
@@ -58,7 +63,7 @@ public class SecurityConfig {
                                 "/error", "/css/**", "/js/**",
                                 "/images/**", "/favicon.ico").permitAll()
                         .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/staff", "/staff/**").hasAnyRole("ADMIN", "STAFF")
+                        .requestMatchers("/staff", "/staff/**", "/api/invoices/**").hasAnyRole("ADMIN", "STAFF")
                         .requestMatchers("/account/orders", "/account/orders/**").hasRole("CUSTOMER")
                         .requestMatchers("/cart", "/cart/**", "/checkout", "/checkout/**",
                                 "/orders", "/orders/**")
@@ -103,6 +108,11 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .exceptionHandling(ex -> ex.accessDeniedPage("/access-denied"));
+        if (clients.getIfAvailable() != null && clients.getObject().findByRegistrationId("google") != null) {
+            http.oauth2Login(login -> login.loginPage("/login")
+                    .userInfoEndpoint(info -> info.oidcUserService(google.getObject()))
+                    .failureUrl("/login?googleError"));
+        }
         return http.build();
     }
 }

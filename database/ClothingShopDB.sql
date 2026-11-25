@@ -26,12 +26,14 @@ CREATE TABLE Users (
                        FullName NVARCHAR(100) NOT NULL,
                        Email NVARCHAR(150) NOT NULL UNIQUE,
                        Phone VARCHAR(20) NULL,
+                       GoogleSubject VARCHAR(255) NULL,
                        PasswordHash NVARCHAR(255) NOT NULL,
                        Address NVARCHAR(300) NULL,
                        IsActive BIT NOT NULL DEFAULT 1,
                        CreatedAt DATETIME2(0) NOT NULL DEFAULT SYSDATETIME(),
                        CONSTRAINT FK_Users_Roles FOREIGN KEY (RoleId) REFERENCES Roles(RoleId)
 );
+CREATE UNIQUE INDEX UX_Users_GoogleSubject ON Users(GoogleSubject) WHERE GoogleSubject IS NOT NULL;
 CREATE TABLE Categories (
                             CategoryId INT IDENTITY(1,1) PRIMARY KEY,
                             CategoryName NVARCHAR(100) NOT NULL UNIQUE,

@@ -11,7 +11,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Locale;
 
@@ -34,6 +33,15 @@ public class AuthService {
     @Transactional
     public void registerCustomer(RegisterForm form) {
 
+        createAccount(form, "CUSTOMER");
+    }
+
+    @Transactional
+    public void createStaff(RegisterForm form) {
+        createAccount(form, "STAFF");
+    }
+
+    private void createAccount(RegisterForm form, String roleName) {
         String email = form.getEmail()
                 .trim()
                 .toLowerCase(Locale.ROOT);
@@ -44,18 +52,13 @@ public class AuthService {
             );
         }
 
-        if (form.getPassword()
-                .getBytes(StandardCharsets.UTF_8).length > 72) {
-            throw new IllegalArgumentException(
-                    "Mật khẩu vượt quá giới hạn của BCrypt"
-            );
-        }
+        PasswordPolicy.require(form.getPassword());
 
-        Role customerRole = roleRepository
-                .findByRoleName("CUSTOMER")
+        Role role = roleRepository
+                .findByRoleName(roleName)
                 .orElseThrow(() ->
                         new IllegalStateException(
-                                "Chưa cấu hình vai trò CUSTOMER"
+                                "Chưa cấu hình vai trò " + roleName
                         )
                 );
 
@@ -77,7 +80,7 @@ public class AuthService {
         );
 
         // Cố định quyền khi đăng ký
-        user.setRole(customerRole);
+        user.setRole(role);
         user.setIsActive(true);
         user.setCreatedAt(LocalDateTime.now());
 
