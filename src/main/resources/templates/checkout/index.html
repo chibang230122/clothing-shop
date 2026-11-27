@@ -6,6 +6,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Thanh toán - Clothing Shop</title>
+    <style>
+        .checkout-page { max-width: 1080px; }
+        .checkout-page h2 { font-size: 1.6rem; }
+        .checkout-page .card { border-radius: .75rem; }
+        .checkout-page .card-body { padding: 1.2rem !important; }
+        .checkout-page .form-control, .checkout-page .form-select {
+            min-height: 39px; padding: .45rem .7rem; font-size: .95rem;
+        }
+        .checkout-page textarea.form-control { min-height: 76px; }
+        .checkout-page .mb-3 { margin-bottom: .8rem !important; }
+        @media (max-width: 576px) {
+            .checkout-page .card-body { padding: 1rem !important; }
+        }
+    </style>
 </head>
 <body>
 
@@ -13,7 +27,7 @@
 
 <div th:replace="~{fragments/bootstrap-menu :: menu}"></div>
 
-<div class="container my-5">
+<div class="container checkout-page my-4">
 
     <h2 class="mb-4">Thanh toán đơn hàng</h2>
 
@@ -86,11 +100,8 @@
                                     Chuyển khoản ngân hàng
                                 </option>
 
-                                <option value="E_WALLET">
-                                    Ví điện tử
-                                </option>
-
                             </select>
+                            <div class="form-text">Chọn chuyển khoản ngân hàng để xem mã QR ở trang chi tiết đơn hàng. Đơn chỉ được xác nhận đã thanh toán sau khi có xác nhận demo hoặc SePay.</div>
 
                             <div class="text-danger small mt-1"
                                  th:errors="*{paymentMethod}">

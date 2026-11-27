@@ -97,7 +97,7 @@ public class CheckoutController {
             ShopOrder order = orderService.checkoutNow(
                     principal.getName(), variantId, quantity, checkoutForm);
             redirectAttributes.addFlashAttribute(
-                    "successMessage", "Mua ngay thành công! Mã đơn hàng: " + order.getOrderCode());
+                    "successMessage", "Đã tạo đơn mua ngay! Mã đơn hàng: " + order.getOrderCode());
             return "redirect:/account/orders/" + order.getOrderId();
         } catch (AccessDeniedException e) {
             throw e;
@@ -185,7 +185,7 @@ public class CheckoutController {
 
             redirectAttributes.addFlashAttribute(
                     "successMessage",
-                    "Đặt hàng thành công! Mã đơn hàng: "
+                    "Đã tạo đơn hàng! Mã đơn hàng: "
                             + order.getOrderCode()
             );
 

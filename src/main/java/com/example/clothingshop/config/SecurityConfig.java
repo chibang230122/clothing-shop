@@ -56,11 +56,12 @@ public class SecurityConfig {
             CustomUserDetailsService userDetailsService, SessionRegistry sessions,
             ObjectProvider<GoogleLoginService> google,
             ObjectProvider<ClientRegistrationRepository> clients) throws Exception {
+        http.csrf(csrf -> csrf.ignoringRequestMatchers("/webhook/sepay"));
         http.authenticationProvider(authenticationProvider)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/products", "/products/**", "/login", "/register",
                                 "/forgot-password", "/reset-password", "/access-denied",
-                                "/error", "/css/**", "/js/**",
+                                "/error", "/webhook/sepay", "/css/**", "/js/**",
                                 "/images/**", "/favicon.ico").permitAll()
                         .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
                         .requestMatchers("/staff", "/staff/**", "/api/invoices/**").hasAnyRole("ADMIN", "STAFF")

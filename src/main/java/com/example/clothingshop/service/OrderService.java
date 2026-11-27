@@ -7,6 +7,7 @@ import com.example.clothingshop.entity.CartItem;
 import com.example.clothingshop.entity.OrderItem;
 import com.example.clothingshop.entity.ProductVariant;
 import com.example.clothingshop.entity.ShopOrder;
+import com.example.clothingshop.entity.StockTransaction;
 import com.example.clothingshop.entity.User;
 import com.example.clothingshop.repository.CartItemRepository;
 import com.example.clothingshop.repository.CartRepository;
@@ -195,6 +196,7 @@ public class OrderService {
 
             // Trừ tồn kho trong cùng transaction với việc tạo đơn hàng.
             variant.setStockQuantity(stock - quantity);
+            entityManager.persist(new StockTransaction(variant, "SALE", -quantity, stock, stock - quantity, order.getOrderCode(), "Xuất kho khi đặt hàng", user));
         }
 
         BigDecimal shippingFee = BigDecimal.ZERO;
@@ -279,6 +281,7 @@ public class OrderService {
         orderItemRepository.save(item);
 
         variant.setStockQuantity(stock - quantity);
+        entityManager.persist(new StockTransaction(variant, "SALE", -quantity, stock, stock - quantity, order.getOrderCode(), "Xuất kho khi đặt hàng", user));
         return order;
     }
 
@@ -304,7 +307,7 @@ public class OrderService {
         }
 
         if (form.getPaymentMethod() == null
-                || !List.of("COD", "BANK_TRANSFER", "E_WALLET")
+                || !List.of("COD", "BANK_TRANSFER")
                 .contains(form.getPaymentMethod())) {
             throw new IllegalArgumentException(
                     "Phương thức thanh toán không hợp lệ.");
