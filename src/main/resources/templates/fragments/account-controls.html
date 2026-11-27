@@ -6,18 +6,11 @@
         th:attr="aria-controls=${inputId}" aria-label="Hiện mật khẩu">Hiện</button>
 
 <div th:fragment="googleButton(label)" class="mb-3">
-    <a th:if="${googleEnabled}" th:href="@{/oauth2/authorization/google}"
+    <a th:href="@{/oauth2/authorization/google}"
        class="btn btn-light border rounded-pill w-100">
         <img th:src="@{/images/google-g.png}" width="20" height="20" alt="" class="me-2">
         <span th:text="${label}"></span>
     </a>
-    <details th:unless="${googleEnabled}">
-        <summary class="btn btn-light border rounded-pill w-100">
-            <img th:src="@{/images/google-g.png}" width="20" height="20" alt="" class="me-2">
-            <span th:text="${label}"></span>
-        </summary>
-        <p class="text-muted small mt-2 mb-0">Cửa hàng chưa bật xác thực Google. Bạn có thể tiếp tục bằng email bên dưới.</p>
-    </details>
 </div>
 
 <a th:fragment="identity(cssClass)" th:if="${signedInAccount != null}"

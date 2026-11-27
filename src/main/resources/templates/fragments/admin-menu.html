@@ -41,6 +41,11 @@
                        th:classappend="${currentPath != null and #strings.startsWith(currentPath, '/staff/orders')} ? 'active bg-warning text-dark fw-bold rounded' : ''"
                        th:href="@{/staff/orders}">Quản lý đơn hàng</a>
                 </li>
+                <li class="nav-item" sec:authorize="hasAnyRole('ADMIN','STAFF')">
+                    <a class="nav-link px-3"
+                       th:classappend="${currentPath != null and (#strings.startsWith(currentPath, '/staff/stock-transactions') or #strings.startsWith(currentPath, '/admin/stock-transactions'))} ? 'active bg-warning text-dark fw-bold rounded' : ''"
+                       th:href="@{/staff/stock-transactions}">Lịch sử nhập – xuất kho</a>
+                </li>
                 <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                     <a class="nav-link px-3"
                        th:classappend="${currentPath != null and #strings.startsWith(currentPath, '/admin/accounts')} ? 'active bg-warning text-dark fw-bold rounded' : ''"

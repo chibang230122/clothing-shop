@@ -57,5 +57,8 @@ public class OrderManagementService {
         }
 
         order.setOrderStatus(newStatus);
+        if ("COMPLETED".equals(newStatus) && "COD".equals(order.getPaymentMethod())) {
+            order.setPaymentStatus("PAID");
+        }
     }
 }

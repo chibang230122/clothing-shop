@@ -23,7 +23,7 @@ public class CheckoutForm {
 
     @NotBlank(message = "Vui lòng chọn phương thức thanh toán.")
     @Pattern(
-            regexp = "COD|BANK_TRANSFER|E_WALLET",
+            regexp = "COD|BANK_TRANSFER",
             message = "Phương thức thanh toán không hợp lệ."
     )
     private String paymentMethod = "COD";

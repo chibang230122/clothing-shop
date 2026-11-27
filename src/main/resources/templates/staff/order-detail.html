@@ -44,6 +44,14 @@
             <h5>Tổng cộng: <span class="text-danger" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span></h5>
         </div>
     </div></div>
+    <div th:if="${successMessage}" class="alert alert-success mt-3" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger mt-3" th:text="${errorMessage}"></div>
+    <section class="card mt-3" th:if="${order.paymentMethod == 'BANK_TRANSFER' and order.paymentStatus == 'UNPAID'}"><div class="card-body"><h5>Thanh toán chuyển khoản</h5><form th:action="@{/staff/orders/{id}/payment(id=${order.orderId})}" method="post" onsubmit="return confirm('Xác nhận đã nhận đủ tiền chuyển khoản?');"><button class="btn btn-success" type="submit">Xác nhận đã thanh toán</button></form></div></section>
+    <section class="card mt-3" th:if="${order.orderStatus == 'RETURN_REQUESTED' or order.orderStatus == 'RETURN_RECEIVED'}"><div class="card-body">
+        <h5>Trả hàng và hoàn tiền</h5>
+        <form th:if="${order.orderStatus == 'RETURN_REQUESTED'}" th:action="@{/staff/orders/{id}/return-received(id=${order.orderId})}" method="post"><button class="btn btn-warning" type="submit">Xác nhận đã nhận hàng trả</button></form>
+        <form th:if="${order.orderStatus == 'RETURN_RECEIVED'}" th:action="@{/staff/orders/{id}/refund(id=${order.orderId})}" method="post" onsubmit="return confirm('Xác nhận đã chuyển tiền hoàn cho khách và cộng lại tồn kho?');"><button class="btn btn-danger" type="submit">Xác nhận hoàn tiền và hoàn kho</button></form>
+    </div></section>
     <section class="card mt-3"><div class="card-body">
         <h5>Xuất hóa đơn</h5>
         <form id="invoice-email" method="post" th:action="@{/api/invoices/{id}/email(id=${order.orderId})}">

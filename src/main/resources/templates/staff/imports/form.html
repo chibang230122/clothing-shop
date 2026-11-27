@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header('Phiếu nhập kho')}"></head>
+<body>
+<div th:replace="~{fragments/bootstrap-menu :: menu}"></div>
+<main class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4"><h2 class="mb-0">Tạo phiếu nhập kho</h2><div class="d-flex gap-2"><a class="btn btn-outline-primary" th:href="@{/staff/imports}">Lịch sử phiếu nhập</a><a class="btn btn-outline-secondary" th:href="@{/staff/dashboard}">Quay lại</a></div></div>
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+    <form method="post" th:action="@{/staff/imports}" th:object="${form}" class="card card-body shadow-sm">
+        <div class="mb-3"><label class="form-label">Ghi chú</label><input class="form-control" th:field="*{note}" maxlength="500"></div>
+        <div class="table-responsive"><table class="table table-bordered align-middle" id="import-lines"><thead class="table-light"><tr><th>Sản phẩm / biến thể</th><th style="width:150px">Số lượng</th><th style="width:190px">Giá nhập</th><th style="width:90px"></th></tr></thead><tbody>
+        <tr th:each="line,stat : *{lines}"><td><select class="form-select" th:field="*{lines[__${stat.index}__].variantId}" required><option value="">Chọn biến thể</option><option th:each="v : ${variants}" th:value="${v.variantId}" th:text="${v.product.productName + ' - ' + v.sku + ' - ' + v.size + ' - ' + v.color + ' (Tồn: ' + v.stockQuantity + ')'}"></option></select></td><td><input class="form-control" type="number" min="1" th:field="*{lines[__${stat.index}__].quantity}" required></td><td><input class="form-control" type="number" min="0" step="0.01" th:field="*{lines[__${stat.index}__].importPrice}" required></td><td><button type="button" class="btn btn-outline-danger remove-line">Xóa</button></td></tr>
+        </tbody></table></div>
+        <div class="d-flex justify-content-between"><button type="button" id="add-line" class="btn btn-outline-primary">Thêm sản phẩm</button><button class="btn btn-primary" type="submit">Tạo phiếu nhập</button></div>
+    </form>
+</main>
+<template id="variant-options"><option value="">Chọn biến thể</option><option th:each="v : ${variants}" th:value="${v.variantId}" th:text="${v.product.productName + ' - ' + v.sku + ' - ' + v.size + ' - ' + v.color + ' (Tồn: ' + v.stockQuantity + ')'}"></option></template>
+<script>
+const tbody=document.querySelector('#import-lines tbody');
+function reindex(){[...tbody.rows].forEach((row,i)=>row.querySelectorAll('select,input').forEach(el=>el.name=el.name.replace(/lines\[\d+\]/,`lines[${i}]`)));}
+document.getElementById('add-line').addEventListener('click',()=>{const tr=document.createElement('tr');const select=document.createElement('select');select.className='form-select';select.required=true;select.name='lines[0].variantId';select.innerHTML=document.getElementById('variant-options').innerHTML;const quantity=document.createElement('input');quantity.className='form-control';quantity.type='number';quantity.min='1';quantity.required=true;quantity.name='lines[0].quantity';const price=document.createElement('input');price.className='form-control';price.type='number';price.min='0';price.step='0.01';price.required=true;price.name='lines[0].importPrice';const a=document.createElement('td');a.appendChild(select);const b=document.createElement('td');b.appendChild(quantity);const c=document.createElement('td');c.appendChild(price);const d=document.createElement('td');d.innerHTML='<button type="button" class="btn btn-outline-danger remove-line">Xóa</button>';tr.append(a,b,c,d);tbody.appendChild(tr);reindex();});
+tbody.addEventListener('click',e=>{if(e.target.classList.contains('remove-line')&&tbody.rows.length>1){e.target.closest('tr').remove();reindex();}});
+</script>
+</body></html>

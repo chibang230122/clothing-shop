@@ -62,6 +62,9 @@
                        th:href="@{/staff/dashboard}">Dashboard Staff</a>
                 </li>
 
+                <li class="nav-item" sec:authorize="hasAnyRole('ADMIN','STAFF')">
+                    <a class="nav-link" th:href="@{/staff/imports/new}" th:classappend="${currentPath != null and #strings.startsWith(currentPath, '/staff/imports')} ? 'active' : ''">Phiếu nhập kho</a>
+                </li>
                 <!-- STAFF và ADMIN vào Quản lý đơn hàng -->
                 <li class="nav-item" sec:authorize="hasAnyRole('ADMIN','STAFF')">
                     <a class="nav-link px-3"

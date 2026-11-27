@@ -23,17 +23,20 @@ Các tệp của riêng lần cập nhật này gồm:
 
 HTTP 404 khi đơn hàng không tồn tại. API gửi thư trả 200 khi SMTP tiếp nhận, 503 khi thiếu máy chủ hoặc địa chỉ gửi, 502 khi tạo hoặc gửi thư thất bại. Mỗi lần nhấn gửi thành công tương ứng với một email.
 
-## Cấu hình Google
+## Cấu hình Google và email trên Windows
 
 1. **Cơ sở dữ liệu đang dùng** — Chạy `database/upgrade_google_login.sql` trong SQL Server Management Studio trước khi khởi động phiên bản này, kể cả khi chỉ dùng đăng nhập mật khẩu. Script bổ sung cột và chỉ mục cho tài khoản Google. Với cơ sở dữ liệu mới, dùng `database/ClothingShopDB.sql`. Script khởi tạo này xóa và tạo lại cơ sở dữ liệu cùng tên.
 2. **Google** — Trong Google Cloud Console, cấu hình OAuth consent screen và tạo OAuth client loại **Web application**. Thêm chính xác `http://localhost:8081/login/oauth2/code/google` vào **Authorized redirect URIs**. Khi chạy ở tên miền khác, dùng địa chỉ HTTPS của ứng dụng với cùng đường dẫn callback. Nếu ứng dụng ở chế độ Testing, thêm tài khoản thử vào danh sách Test users.
 3. **Brevo** — Chuẩn bị SMTP login, SMTP key và địa chỉ gửi đã xác minh. Cấu hình mẫu dưới đây bật cả hai profile. Thay các giá trị trong dấu ngoặc nhọn bằng thông tin riêng, chạy từ thư mục chứa `pom.xml` trong cùng cửa sổ PowerShell.
-4. **Mở file application-google.properties** — cấu hình như sau: (không được upload lên github)
 
 ```powershell
-spring.security.oauth2.client.registration.google.client-id=952027895118-dl3q0fot7uredg5l39eqm330mkqr9039.apps.googleusercontent.com
-spring.security.oauth2.client.registration.google.client-secret=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
-spring.security.oauth2.client.registration.google.scope=openid,email,profile
+$env:SPRING_PROFILES_ACTIVE = "otp-brevo,google"
+$env:GOOGLE_CLIENT_ID = "<OAuth Client ID>"
+$env:GOOGLE_CLIENT_SECRET = "<OAuth Client Secret>"
+$env:BREVO_SMTP_LOGIN = "<SMTP login>"
+$env:BREVO_SMTP_KEY = "<SMTP key>"
+$env:BREVO_FROM = "<Email người gửi đã xác minh>"
+.\mvnw.cmd spring-boot:run
 ```
 
 Truy cập `http://localhost:8081/login` và chọn **Đăng nhập bằng Google**. Lần đầu, một email Google đã xác minh và chưa có trong cửa hàng sẽ tạo tài khoản CUSTOMER. Lần sau, hệ thống nhận diện bằng mã người dùng Google. Tài khoản bị khóa hoặc email trùng tài khoản khác sẽ được báo lỗi. Người dùng đã đăng ký bằng mật khẩu tiếp tục dùng nút **Đăng nhập**. Cả hai trang đều hiện nút Google. Khi chưa cấu hình OAuth, nhấn nút sẽ hiện thông báo. Khi đã cấu hình, hai nút mở cùng luồng xác thực của Google.

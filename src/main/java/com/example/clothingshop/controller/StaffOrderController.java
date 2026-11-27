@@ -4,6 +4,7 @@ import com.example.clothingshop.entity.ShopOrder;
 import com.example.clothingshop.repository.OrderItemRepository;
 import com.example.clothingshop.repository.ShopOrderRepository;
 import com.example.clothingshop.service.OrderManagementService;
+import com.example.clothingshop.service.OrderPaymentService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -24,14 +25,17 @@ public class StaffOrderController {
     private final ShopOrderRepository shopOrderRepository;
     private final OrderItemRepository orderItemRepository;
     private final OrderManagementService orderManagementService;
+    private final OrderPaymentService orderPaymentService;
 
     public StaffOrderController(
             ShopOrderRepository shopOrderRepository,
             OrderItemRepository orderItemRepository,
-            OrderManagementService orderManagementService) {
+            OrderManagementService orderManagementService,
+            OrderPaymentService orderPaymentService) {
         this.shopOrderRepository = shopOrderRepository;
         this.orderItemRepository = orderItemRepository;
         this.orderManagementService = orderManagementService;
+        this.orderPaymentService = orderPaymentService;
     }
 
     @GetMapping
@@ -94,6 +98,13 @@ public class StaffOrderController {
                     e.getMessage() == null ? "Cập nhật trạng thái thất bại." : e.getMessage());
         }
         return "redirect:/staff/orders";
+    }
+
+    @PostMapping("/{orderId}/payment")
+    public String confirmPayment(@PathVariable Long orderId, RedirectAttributes ra) {
+        try { orderPaymentService.confirmPayment(orderId); ra.addFlashAttribute("successMessage", "Đã xác nhận nhận thanh toán."); }
+        catch (Exception e) { ra.addFlashAttribute("errorMessage", e.getMessage()); }
+        return "redirect:/staff/orders/" + orderId;
     }
 
     private LocalDateTime parseDate(String value, boolean endOfDay) {

@@ -27,6 +27,9 @@
                     <option value="SHIPPING" th:selected="${status == 'SHIPPING'}">Đang giao</option>
                     <option value="COMPLETED" th:selected="${status == 'COMPLETED'}">Hoàn thành</option>
                     <option value="CANCELLED" th:selected="${status == 'CANCELLED'}">Đã hủy</option>
+                    <option value="RETURN_REQUESTED" th:selected="${status == 'RETURN_REQUESTED'}">Yêu cầu trả hàng</option>
+                    <option value="RETURN_RECEIVED" th:selected="${status == 'RETURN_RECEIVED'}">Đã nhận hàng trả</option>
+                    <option value="RETURNED" th:selected="${status == 'RETURNED'}">Đã hoàn tiền</option>
                 </select>
             </div>
             <div class="col-md-2">

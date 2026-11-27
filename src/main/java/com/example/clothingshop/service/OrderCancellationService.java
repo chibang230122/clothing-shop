@@ -68,9 +68,12 @@ public class OrderCancellationService {
                 );
             }
 
-            variant.setStockQuantity(
-                    variant.getStockQuantity() + item.getQuantity()
-            );
+            int before = variant.getStockQuantity();
+            int after = before + item.getQuantity();
+            variant.setStockQuantity(after);
+            entityManager.persist(new com.example.clothingshop.entity.StockTransaction(
+                    variant, "RETURN", item.getQuantity(), before, after,
+                    order.getOrderCode(), "Hoàn kho do khách hủy đơn", order.getUser()));
         }
 
         order.setOrderStatus("CANCELLED");
