@@ -130,7 +130,7 @@ UPDATE BannedWords SET Word = N'lừa đảo', NormalizedWord = 'lua dao' WHERE 
 UPDATE BannedWords SET Word = N'hàng giả', NormalizedWord = 'hang gia' WHERE NormalizedWord = 'hang gia';
 UPDATE BannedWords SET Word = N'đồ ngốc', NormalizedWord = 'do ngoc' WHERE NormalizedWord = 'do ngoc';
 UPDATE BannedWords SET Word = N'ngu ngốc', NormalizedWord = 'ngu ngoc' WHERE NormalizedWord = 'ngu ngoc';
-SELECT BannedWordId, Word, NormalizedWord, Action FROM BannedWords ORDER BY BannedWordId;
+SELECT WordId, Word, NormalizedWord, Action FROM BannedWords ORDER BY WordId;
 
 GO
 
