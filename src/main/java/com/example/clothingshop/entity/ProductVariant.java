@@ -97,4 +97,16 @@ public class ProductVariant {
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
     }
+
+    @jakarta.persistence.Version
+    @jakarta.persistence.Column(name = "Version")
+    private Long version = 0L;
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
 }
