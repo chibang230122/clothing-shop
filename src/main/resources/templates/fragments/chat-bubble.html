@@ -1,0 +1,28 @@
+<div th:fragment="chatWidget" id="shop-chat-widget" sec:authorize="hasRole('CUSTOMER')">
+    <link rel="stylesheet" th:href="@{/css/chat-bubble.css}">
+
+    <button id="chat-bubble-toggle" type="button" title="Hỗ trợ trực tuyến">
+        💬
+        <span id="chat-unread-dot" class="hidden"></span>
+    </button>
+
+    <div id="chat-popup-box" class="hidden">
+        <div class="chat-popup-header">
+            <span>Hỗ trợ khách hàng trực tuyến</span>
+            <button id="chat-popup-close" type="button">✕</button>
+        </div>
+        <div id="chat-popup-meta" style="padding:5px 12px;font-size:11.5px;background:#f1f5f9;color:#334155;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+            <span id="chat-agent-info" style="color:#334155;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Hỗ trợ: Chờ tiếp nhận</span>
+            <span id="chat-claim-status" style="font-weight:600;color:#b45309;background:#fef3c7;padding:1px 7px;border-radius:999px;white-space:nowrap;">Chưa tiếp nhận</span>
+        </div>
+        <div id="chat-popup-messages"></div>
+        <div id="chat-popup-notice" class="hidden"></div>
+        <form id="chat-popup-form">
+            <input id="chat-popup-input" type="text" placeholder="Nhập tin nhắn cần hỗ trợ..." autocomplete="off" />
+            <button type="submit">Gửi</button>
+        </form>
+    </div>
+
+    <script th:src="@{/js/chat-bridge.js}"></script>
+    <script th:src="@{/js/chat-bubble.js}"></script>
+</div>

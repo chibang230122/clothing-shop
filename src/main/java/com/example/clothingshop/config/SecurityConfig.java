@@ -63,6 +63,7 @@ public class SecurityConfig {
                                 "/forgot-password", "/reset-password", "/access-denied",
                                 "/error", "/webhook/sepay", "/css/**", "/js/**",
                                 "/images/**", "/favicon.ico").permitAll()
+                .requestMatchers("/ws/tcp-bridge/**").authenticated()
                         .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
                         .requestMatchers("/staff", "/staff/**", "/api/invoices/**").hasAnyRole("ADMIN", "STAFF")
                         .requestMatchers("/account/orders", "/account/orders/**").hasRole("CUSTOMER")
