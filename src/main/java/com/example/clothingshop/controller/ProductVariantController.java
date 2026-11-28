@@ -167,57 +167,38 @@ public class ProductVariantController {
     }
 
     // Kiểm tra dữ liệu thêm và sửa
-    private String validateVariant(Integer productId,
-                                   ProductVariant variant,
-                                   Integer currentVariantId) {
+    private String validateVariant(Integer productId, ProductVariant variant, Integer currentVariantId) {
         String sku = variant.getSku();
         String size = variant.getSize();
         String color = variant.getColor();
-
         if (sku == null || sku.trim().isEmpty()) {
             return "SKU không được để trống!";
         }
-
         sku = sku.trim();
-
         ProductVariant sameSku = variantRepository.findBySkuIgnoreCase(sku).orElse(null);
-
-        if (sameSku != null
-                && !sameSku.getVariantId().equals(currentVariantId)) {
+        if (sameSku != null && !sameSku.getVariantId().equals(currentVariantId)) {
             return "SKU đã tồn tại!";
         }
-
         if (size == null || size.trim().isEmpty()) {
             return "Size không được để trống!";
         }
-
         if (color == null || color.trim().isEmpty()) {
             return "Màu sắc không được để trống!";
         }
-
         size = size.trim();
         color = color.trim();
-
-        boolean duplicateSizeColor =
-                variantRepository.existsByProduct_ProductIdAndSizeIgnoreCaseAndColorIgnoreCase(
-                        productId, size, color);
-
+        boolean duplicateSizeColor = variantRepository.existsByProduct_ProductIdAndSizeIgnoreCaseAndColorIgnoreCase(productId, size, color);
         if (duplicateSizeColor) {
-            ProductVariant sameVariant =
-                    variantRepository.findByProduct_ProductIdAndSizeIgnoreCaseAndColorIgnoreCase(
-                            productId, size, color).orElse(null);
-
+            ProductVariant sameVariant = variantRepository.findByProduct_ProductIdAndSizeIgnoreCaseAndColorIgnoreCase(productId, size, color).orElse(null);
             if (sameVariant != null
                     && !sameVariant.getVariantId().equals(currentVariantId)) {
                 return "Size và màu sắc này đã tồn tại trong sản phẩm!";
             }
         }
-
         if (variant.getStockQuantity() == null
                 || variant.getStockQuantity() < 0) {
             return "Tồn kho không được để trống hoặc âm!";
         }
-
         return null;
     }
 

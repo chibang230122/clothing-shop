@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="vi"
       xmlns:th="http://www.thymeleaf.org">
@@ -16,6 +15,16 @@
         }
         .checkout-page textarea.form-control { min-height: 76px; }
         .checkout-page .mb-3 { margin-bottom: .8rem !important; }
+        .voucher-summary { list-style: none; cursor: pointer; }
+        .voucher-summary::-webkit-details-marker { display: none; }
+        .voucher-item-disabled {
+            background-color: #e9ecef !important;
+            color: #6c757d !important;
+            filter: grayscale(100%);
+            opacity: 0.72;
+            cursor: not-allowed;
+            user-select: none;
+        }
         @media (max-width: 576px) {
             .checkout-page .card-body { padding: 1rem !important; }
         }
@@ -27,7 +36,9 @@
 
 <div th:replace="~{fragments/bootstrap-menu :: menu}"></div>
 
-<div class="container checkout-page my-4">
+<div class="container checkout-page my-4"
+     th:with="orderAmt=${totalAmount != null ? totalAmount.doubleValue() : 0.0},
+              vResult=${voucherService.evaluate(appliedVoucherCode, totalAmount)}">
 
     <h2 class="mb-4">Thanh toán đơn hàng</h2>
 
@@ -38,6 +49,7 @@
 
     <div class="row g-4">
 
+        <!-- Cột trái: Form thông tin giao hàng -->
         <div class="col-lg-7">
 
             <div class="card shadow-sm">
@@ -48,6 +60,9 @@
                     <form th:action="@{/checkout}"
                           th:object="${checkoutForm}"
                           method="post">
+
+                        <input type="hidden" name="voucherCode"
+                               th:value="${vResult != null and vResult.valid ? vResult.code : ''}">
 
                         <div class="mb-3">
                             <label class="form-label">Tên người nhận</label>
@@ -143,6 +158,7 @@
 
         </div>
 
+        <!-- Cột phải: Đơn hàng của bạn & Chọn Voucher -->
         <div class="col-lg-5">
 
             <div class="card shadow-sm">
@@ -203,13 +219,105 @@
                         <span>Miễn phí</span>
                     </div>
 
+                    <!-- Khu vực chọn / nhập Voucher (Thuần HTML/Thymeleaf, không dùng script) -->
+                    <div class="border-top pt-3 mt-3">
+                        <details class="mb-2">
+                            <summary class="d-flex justify-content-between align-items-center voucher-summary">
+                                <span class="fw-semibold small">Mã giảm giá (Voucher)</span>
+                                <span class="btn btn-outline-warning text-dark btn-sm py-0 px-2 fw-semibold">
+                                    Chọn mã giảm giá ▾
+                                </span>
+                            </summary>
+
+                            <!-- Danh sách Voucher sổ xuống -->
+                            <div class="border rounded p-2 mt-2 bg-light" style="max-height: 230px; overflow-y: auto;">
+                                <div th:if="${shopVouchers == null or #lists.isEmpty(shopVouchers)}"
+                                     class="text-muted small text-center py-2">
+                                    Hiện không có mã giảm giá nào khả dụng.
+                                </div>
+
+                                <div th:each="v : ${shopVouchers}"
+                                     th:with="minAmt=${v.minOrderAmount != null ? v.minOrderAmount.doubleValue() : 0.0},
+                                              eligible=${orderAmt >= minAmt}">
+
+                                    <!-- 1. MÃ ÁP DỤNG ĐƯỢC: Hiện màu nổi bật + Nút Áp dụng -->
+                                    <div th:if="${eligible}"
+                                         class="d-flex justify-content-between align-items-center bg-white border border-warning rounded p-2 mb-2 shadow-sm">
+                                        <div class="pe-2">
+                                            <div>
+                                                <span class="badge bg-danger me-1" th:text="${v.code}">CODE</span>
+                                                <span class="fw-bold small text-dark"
+                                                      th:text="${v.discountType == 'PERCENT'
+                                                          ? 'Giảm ' + v.discountValue.intValue() + '%' + (v.maxDiscountAmount != null ? ' (tối đa ' + #numbers.formatDecimal(v.maxDiscountAmount,0,'COMMA',0,'POINT') + ' đ)' : '')
+                                                          : 'Giảm ' + #numbers.formatDecimal(v.discountValue,0,'COMMA',0,'POINT') + ' đ'}">
+                                                </span>
+                                            </div>
+                                            <div class="text-muted" style="font-size: 12px;"
+                                                 th:text="'Áp dụng cho đơn từ ' + ${#numbers.formatDecimal(minAmt,0,'COMMA',0,'POINT')} + ' đ'">
+                                            </div>
+                                        </div>
+                                        <a th:href="@{/checkout(voucherCode=${v.code})}"
+                                           class="btn btn-danger btn-sm fw-semibold flex-shrink-0">
+                                            Áp dụng
+                                        </a>
+                                    </div>
+
+                                    <!-- 2. MÃ KHÔNG ÁP DỤNG ĐƯỢC: Làm xám đi + Khóa không cho chọn -->
+                                    <div th:unless="${eligible}"
+                                         class="d-flex justify-content-between align-items-center border rounded p-2 mb-2 voucher-item-disabled">
+                                        <div class="pe-2">
+                                            <div>
+                                                <span class="badge bg-secondary me-1" th:text="${v.code}">CODE</span>
+                                                <span class="fw-semibold small"
+                                                      th:text="${v.discountType == 'PERCENT'
+                                                          ? 'Giảm ' + v.discountValue.intValue() + '%'
+                                                          : 'Giảm ' + #numbers.formatDecimal(v.discountValue,0,'COMMA',0,'POINT') + ' đ'}">
+                                                </span>
+                                            </div>
+                                            <div style="font-size: 12px;"
+                                                 th:text="'Mua thêm ' + ${#numbers.formatDecimal(minAmt - orderAmt,0,'COMMA',0,'POINT')} + ' đ để áp dụng'">
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-secondary btn-sm flex-shrink-0" disabled>
+                                            Không đủ ĐK
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </details>
+
+                        <!-- Form nhập mã thủ công -->
+                        <form th:action="@{/checkout}" method="get" class="input-group input-group-sm">
+                            <input type="text" name="voucherCode" class="form-control text-uppercase"
+                                   th:value="${appliedVoucherCode}" placeholder="Hoặc nhập mã giảm giá...">
+                            <button type="submit" class="btn btn-dark">Áp dụng</button>
+                        </form>
+
+                        <!-- Thông báo kết quả áp dụng -->
+                        <div th:if="${vResult != null}"
+                             class="small mt-1"
+                             th:classappend="${vResult.valid ? 'text-success fw-semibold' : 'text-danger'}">
+                            <span th:text="${vResult.message}"></span>
+                            <a th:if="${vResult.valid}"
+                               th:href="@{/checkout}"
+                               class="text-danger ms-2 text-decoration-none fw-normal">Bỏ chọn</a>
+                        </div>
+
+                        <!-- Dòng hiển thị số tiền giảm -->
+                        <div th:if="${vResult != null and vResult.valid}"
+                             class="d-flex justify-content-between text-success small fw-semibold mt-2">
+                            <span>Giảm giá voucher (<span th:text="${vResult.code}"></span>):</span>
+                            <span th:text="'-' + ${#numbers.formatDecimal(vResult.discountAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                        </div>
+                    </div>
+
                     <hr>
 
                     <div class="d-flex justify-content-between">
                         <h5>Tổng thanh toán</h5>
 
                         <h5 class="text-danger"
-                            th:text="${#numbers.formatDecimal(totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                            th:text="${#numbers.formatDecimal(vResult != null and vResult.valid ? vResult.finalTotal : totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">
                         </h5>
                     </div>
 

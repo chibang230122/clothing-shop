@@ -200,39 +200,30 @@
 
 <main class="container-shop" id="products">
     <h2>Sản phẩm nổi bật</h2>
-
     <div class="product-list"
          th:if="${products != null and !#lists.isEmpty(products)}">
-
         <a class="product-link" th:each="product : ${products}"
            th:href="@{/products/{id}(id=${product.productId})}">
         <article class="product">
-
             <img th:if="${product.imageUrl != null and !#strings.isEmpty(product.imageUrl)}"
                  th:src="@{${product.imageUrl}}"
                  th:alt="${product.productName}">
-
             <div class="product-img-empty"
                  th:unless="${product.imageUrl != null and !#strings.isEmpty(product.imageUrl)}">
                 Chưa có hình ảnh
             </div>
-
             <div class="product-info">
                 <h3 th:text="${product.productName}">Tên sản phẩm</h3>
-
                 <p class="price"
                    th:text="${#numbers.formatDecimal(product.basePrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">
                     150.000 đ
                 </p>
-
                 <p class="description"
                    th:if="${product.description != null and !#strings.isEmpty(product.description)}"
                    th:text="${product.description}">
                     Mô tả sản phẩm
                 </p>
-
             </div>
-
         </article>
         </a>
     </div>

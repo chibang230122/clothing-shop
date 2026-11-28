@@ -28,12 +28,23 @@
     .recommend-card:hover .card { transform:translateY(-4px); box-shadow:0 .75rem 1.5rem rgba(0,0,0,.12)!important; }
     .recommend-card:hover .card-title { color:#dc3545; }
     .stock-note { font-size:.92rem; }
+
+    /* CSS chọn sao đánh giá (không dùng script) */
+    .star-rating { display: inline-flex; flex-direction: row-reverse; gap: 4px; }
+    .star-rating input { display: none; }
+    .star-rating label { font-size: 1.75rem; color: #ced4da; cursor: pointer; line-height: 1; transition: color .15s ease; }
+    .star-rating input:checked ~ label,
+    .star-rating label:hover,
+    .star-rating label:hover ~ label { color: #ffc107; }
+    .review-avatar { width: 40px; height: 40px; border-radius: 50%; background: #212529; color: #fff; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
     @media(max-width:767px) { .detail-image-wrap,.detail-image { min-height:300px; height:360px; } .detail-card .card-body { padding:1.25rem!important; } }
 </style>
 
 <main class="container detail-shell py-4 py-lg-5">
     <a th:href="@{/products}" class="text-decoration-none text-secondary d-inline-flex align-items-center gap-2 mb-4">&larr; Quay lại sản phẩm</a>
 
+    <!-- Khung thông tin chi tiết sản phẩm -->
     <section class="card detail-card shadow-sm">
         <div class="card-body p-3 p-lg-5">
             <div class="row g-4 g-lg-5 align-items-start">
@@ -108,128 +119,221 @@
             </div>
         </div>
     </section>
+
+    <!-- Khối Đánh giá sản phẩm -->
+    <section id="reviews-section" class="card detail-card shadow-sm mt-4">
+        <div class="card-body p-3 p-lg-5">
+            <div class="d-flex flex-wrap justify-content-between align-items-center border-bottom pb-3 mb-4 gap-2">
+                <div>
+                    <div class="text-uppercase text-secondary small fw-semibold mb-1">Phản hồi từ khách hàng</div>
+                    <h3 class="fw-bold mb-0">Đánh giá sản phẩm</h3>
+                </div>
+                <div class="d-flex align-items-center gap-2 bg-light px-3 py-2 rounded-pill border">
+                    <span class="fs-4 fw-bold text-warning" th:text="${avgRating != null ? avgRating : '0.0'} + ' / 5 ★'">0.0 / 5 ★</span>
+                    <span class="text-secondary small"
+                          th:text="'(' + ${reviews != null ? #lists.size(reviews) : 0} + ' đánh giá)'">(0 đánh giá)</span>
+                </div>
+            </div>
+
+            <div th:if="${reviewSuccess}" class="alert alert-success rounded-3" th:text="${reviewSuccess}"></div>
+            <div th:if="${reviewError}" class="alert alert-danger rounded-3" th:text="${reviewError}"></div>
+
+            <!-- Form gửi đánh giá: chỉ hiện khi CUSTOMER đã mua & hoàn tất đơn hàng -->
+            <div th:if="${canReview}" class="bg-light p-3 p-lg-4 rounded-4 border mb-4">
+                <form th:action="@{/products/{id}/reviews(id=${product.productId})}" method="post">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+                    <div class="mb-3 d-flex flex-wrap align-items-center gap-3">
+                        <span class="fw-bold">Mức độ hài lòng của bạn:</span>
+                        <div class="star-rating" title="Chọn số sao đánh giá">
+                            <input type="radio" id="star5" name="rating" value="5" checked>
+                            <label for="star5" title="5 sao - Tuyệt vời">★</label>
+                            <input type="radio" id="star4" name="rating" value="4">
+                            <label for="star4" title="4 sao - Hài lòng">★</label>
+                            <input type="radio" id="star3" name="rating" value="3">
+                            <label for="star3" title="3 sao - Bình thường">★</label>
+                            <input type="radio" id="star2" name="rating" value="2">
+                            <label for="star2" title="2 sao - Không hài lòng">★</label>
+                            <input type="radio" id="star1" name="rating" value="1">
+                            <label for="star1" title="1 sao - Rất tệ">★</label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <textarea name="comment" class="form-control rounded-3" rows="3" maxlength="1000"
+                                  placeholder="Chia sẻ cảm nhận của bạn về chất liệu, kích cỡ, màu sắc sản phẩm..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-dark rounded-pill px-4 py-2 fw-semibold">Gửi đánh giá</button>
+                </form>
+            </div>
+
+            <!-- Thông báo trạng thái quyền đánh giá -->
+            <div th:if="${alreadyReviewed}" class="alert alert-info py-2 px-3 rounded-3 small mb-4">
+                Bạn đã gửi đánh giá cho sản phẩm này. Cảm ơn phản hồi của bạn!
+            </div>
+
+            <div sec:authorize="isAnonymous()" class="alert alert-secondary py-2 px-3 rounded-3 small mb-4">
+                Vui lòng <a th:href="@{/login}" class="fw-semibold text-dark">đăng nhập</a> và hoàn tất đơn hàng sản phẩm này để viết đánh giá.
+            </div>
+
+            <div sec:authorize="isAuthenticated()"
+                 th:if="${!canReview and !alreadyReviewed}"
+                 class="alert alert-secondary py-2 px-3 rounded-3 small mb-4">
+                Chỉ khách hàng đã mua và hoàn tất đơn hàng (<strong>COMPLETED</strong>) cho sản phẩm này mới có thể viết đánh giá.
+            </div>
+
+            <!-- Danh sách đánh giá -->
+            <div th:if="${reviews == null or #lists.isEmpty(reviews)}" class="text-secondary text-center py-4">
+                Chưa có đánh giá nào cho sản phẩm này. Hãy là người đầu tiên trải nghiệm!
+            </div>
+
+            <div class="list-group list-group-flush" th:if="${reviews != null and !#lists.isEmpty(reviews)}">
+                <div class="list-group-item px-0 py-3" th:each="r : ${reviews}">
+                    <div class="d-flex gap-3">
+                        <div class="review-avatar"
+                             th:text="${r.user != null and r.user.fullName != null and !#strings.isEmpty(r.user.fullName) ? #strings.substring(r.user.fullName, 0, 1).toUpperCase() : 'K'}">K</div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-1 mb-1">
+                                <div>
+                                    <strong th:text="${r.user != null ? r.user.fullName : 'Khách hàng'}">Tên khách hàng</strong>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle ms-2">Đã mua hàng</span>
+                                </div>
+                                <small class="text-secondary"
+                                       th:if="${r.createdAt != null}"
+                                       th:text="${#temporals.format(r.createdAt, 'dd/MM/yyyy HH:mm')}"></small>
+                            </div>
+                            <div class="text-warning fs-6 mb-1"
+                                 th:text="${'★'.repeat(r.rating) + '☆'.repeat(5 - r.rating)}">★★★★★</div>
+                            <p class="mb-0 text-dark" th:text="${r.comment}"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 </main>
 
 <script th:if="${variants != null and !#lists.isEmpty(variants)}">
-(() => {
-    const rows = Array.from(document.querySelectorAll('#variantData .variant-data')).map(el => ({
-        id: el.dataset.id,
-        size: el.dataset.size,
-        color: el.dataset.color,
-        stock: Number(el.dataset.stock || 0)
-    }));
-    const sizeWrap = document.getElementById('sizeOptions');
-    const colorWrap = document.getElementById('colorOptions');
-    const sizeLabel = document.getElementById('selectedSizeLabel');
-    const colorLabel = document.getElementById('selectedColorLabel');
-    const stockLabel = document.getElementById('variantStock');
-    const variantInput = document.getElementById('selectedVariantId');
-    const addButton = document.getElementById('addCartButton');
-    const buyButton = document.getElementById('buyNowButton');
-    const buyForm = document.getElementById('buyNowForm');
-    const quantitySelector = document.getElementById('quantitySelector');
-    const addCartQuantity = document.getElementById('addCartQuantity');
-    const buyNowQuantity = document.getElementById('buyNowQuantity');
-    const decreaseQuantity = document.getElementById('decreaseQuantity');
-    const increaseQuantity = document.getElementById('increaseQuantity');
-    const sizes = [...new Set(rows.map(x => x.size))];
-    const colors = [...new Set(rows.map(x => x.color))];
-    let selectedSize = '';
-    let selectedColor = '';
-    let selectedStock = 0;
+    (() => {
+        const rows = Array.from(document.querySelectorAll('#variantData .variant-data')).map(el => ({
+            id: el.dataset.id,
+            size: el.dataset.size,
+            color: el.dataset.color,
+            stock: Number(el.dataset.stock || 0)
+        }));
+        const sizeWrap = document.getElementById('sizeOptions');
+        const colorWrap = document.getElementById('colorOptions');
+        const sizeLabel = document.getElementById('selectedSizeLabel');
+        const colorLabel = document.getElementById('selectedColorLabel');
+        const stockLabel = document.getElementById('variantStock');
+        const variantInput = document.getElementById('selectedVariantId');
+        const addButton = document.getElementById('addCartButton');
+        const buyButton = document.getElementById('buyNowButton');
+        const buyForm = document.getElementById('buyNowForm');
+        const quantitySelector = document.getElementById('quantitySelector');
+        const addCartQuantity = document.getElementById('addCartQuantity');
+        const buyNowQuantity = document.getElementById('buyNowQuantity');
+        const decreaseQuantity = document.getElementById('decreaseQuantity');
+        const increaseQuantity = document.getElementById('increaseQuantity');
+        const sizes = [...new Set(rows.map(x => x.size))];
+        const colors = [...new Set(rows.map(x => x.color))];
+        let selectedSize = '';
+        let selectedColor = '';
+        let selectedStock = 0;
 
-    function syncQuantity() {
-        let quantity = Number.parseInt(quantitySelector.value, 10);
-        if (!Number.isFinite(quantity) || quantity < 1) quantity = 1;
-        quantity = Math.min(quantity, Math.max(1, selectedStock));
-        quantitySelector.value = quantity;
-        quantitySelector.max = Math.max(1, selectedStock);
-        addCartQuantity.value = quantity;
-        buyNowQuantity.value = quantity;
-        decreaseQuantity.disabled = quantity <= 1;
-        increaseQuantity.disabled = !selectedStock || quantity >= selectedStock;
-    }
-
-    decreaseQuantity.addEventListener('click', () => {
-        quantitySelector.value = Math.max(1, Number(quantitySelector.value || 1) - 1);
-        syncQuantity();
-    });
-    increaseQuantity.addEventListener('click', () => {
-        quantitySelector.value = Math.min(selectedStock, Number(quantitySelector.value || 1) + 1);
-        syncQuantity();
-    });
-    quantitySelector.addEventListener('change', syncQuantity);
-    quantitySelector.addEventListener('input', () => {
-        if (quantitySelector.value !== '') syncQuantity();
-    });
-
-    function available(size, color) {
-        return rows.find(x => x.size === size && x.color === color && x.stock > 0);
-    }
-
-    function render() {
-        sizeWrap.innerHTML = '';
-        colorWrap.innerHTML = '';
-        sizes.forEach(size => {
-            const hasStock = rows.some(x => x.size === size && x.stock > 0);
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className = 'option-btn' + (selectedSize === size ? ' active' : '');
-            button.textContent = size;
-            button.disabled = !hasStock;
-            button.addEventListener('click', () => {
-                selectedSize = size;
-                if (!available(selectedSize, selectedColor)) {
-                    const first = colors.find(color => available(selectedSize, color));
-                    selectedColor = first || '';
-                }
-                render();
-            });
-            sizeWrap.appendChild(button);
-        });
-        colors.forEach(color => {
-            const hasStock = rows.some(x => x.color === color && x.stock > 0);
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className = 'option-btn color-btn' + (selectedColor === color ? ' active' : '');
-            button.textContent = color;
-            button.disabled = !hasStock || !rows.some(x => x.size === selectedSize && x.color === color && x.stock > 0);
-            button.addEventListener('click', () => { selectedColor = color; render(); });
-            colorWrap.appendChild(button);
-        });
-
-        const selected = available(selectedSize, selectedColor);
-        sizeLabel.textContent = selectedSize ? `(${selectedSize})` : '';
-        colorLabel.textContent = selectedColor ? `(${selectedColor})` : '';
-        if (selected) {
-            selectedStock = selected.stock;
-            syncQuantity();
-            variantInput.value = selected.id;
-            stockLabel.textContent = `Còn ${selected.stock} sản phẩm`;
-            stockLabel.className = 'stock-note text-success fw-semibold';
-            addButton.disabled = false;
-            buyButton.disabled = false;
-            buyForm.action = `/checkout/buy-now/${selected.id}`;
-        } else {
-            selectedStock = 0;
-            quantitySelector.value = 1;
-            syncQuantity();
-            variantInput.value = '';
-            stockLabel.textContent = 'Biến thể này hiện đã hết hàng. Vui lòng chọn phân loại khác.';
-            stockLabel.className = 'stock-note text-danger fw-semibold';
-            addButton.disabled = true;
-            buyButton.disabled = true;
-            buyForm.removeAttribute('action');
+        function syncQuantity() {
+            let quantity = Number.parseInt(quantitySelector.value, 10);
+            if (!Number.isFinite(quantity) || quantity < 1) quantity = 1;
+            quantity = Math.min(quantity, Math.max(1, selectedStock));
+            quantitySelector.value = quantity;
+            quantitySelector.max = Math.max(1, selectedStock);
+            addCartQuantity.value = quantity;
+            buyNowQuantity.value = quantity;
+            decreaseQuantity.disabled = quantity <= 1;
+            increaseQuantity.disabled = !selectedStock || quantity >= selectedStock;
         }
-    }
 
-    const first = rows.find(x => x.stock > 0);
-    if (first) {
-        selectedSize = first.size;
-        selectedColor = first.color;
-    }
-    render();
-})();
+        decreaseQuantity.addEventListener('click', () => {
+            quantitySelector.value = Math.max(1, Number(quantitySelector.value || 1) - 1);
+            syncQuantity();
+        });
+        increaseQuantity.addEventListener('click', () => {
+            quantitySelector.value = Math.min(selectedStock, Number(quantitySelector.value || 1) + 1);
+            syncQuantity();
+        });
+        quantitySelector.addEventListener('change', syncQuantity);
+        quantitySelector.addEventListener('input', () => {
+            if (quantitySelector.value !== '') syncQuantity();
+        });
+
+        function available(size, color) {
+            return rows.find(x => x.size === size && x.color === color && x.stock > 0);
+        }
+
+        function render() {
+            sizeWrap.innerHTML = '';
+            colorWrap.innerHTML = '';
+            sizes.forEach(size => {
+                const hasStock = rows.some(x => x.size === size && x.stock > 0);
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'option-btn' + (selectedSize === size ? ' active' : '');
+                button.textContent = size;
+                button.disabled = !hasStock;
+                button.addEventListener('click', () => {
+                    selectedSize = size;
+                    if (!available(selectedSize, selectedColor)) {
+                        const first = colors.find(color => available(selectedSize, color));
+                        selectedColor = first || '';
+                    }
+                    render();
+                });
+                sizeWrap.appendChild(button);
+            });
+            colors.forEach(color => {
+                const hasStock = rows.some(x => x.color === color && x.stock > 0);
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'option-btn color-btn' + (selectedColor === color ? ' active' : '');
+                button.textContent = color;
+                button.disabled = !hasStock || !rows.some(x => x.size === selectedSize && x.color === color && x.stock > 0);
+                button.addEventListener('click', () => { selectedColor = color; render(); });
+                colorWrap.appendChild(button);
+            });
+
+            const selected = available(selectedSize, selectedColor);
+            sizeLabel.textContent = selectedSize ? `(${selectedSize})` : '';
+            colorLabel.textContent = selectedColor ? `(${selectedColor})` : '';
+            if (selected) {
+                selectedStock = selected.stock;
+                syncQuantity();
+                variantInput.value = selected.id;
+                stockLabel.textContent = `Còn ${selected.stock} sản phẩm`;
+                stockLabel.className = 'stock-note text-success fw-semibold';
+                addButton.disabled = false;
+                buyButton.disabled = false;
+                buyForm.action = `/checkout/buy-now/${selected.id}`;
+            } else {
+                selectedStock = 0;
+                quantitySelector.value = 1;
+                syncQuantity();
+                variantInput.value = '';
+                stockLabel.textContent = 'Biến thể này hiện đã hết hàng. Vui lòng chọn phân loại khác.';
+                stockLabel.className = 'stock-note text-danger fw-semibold';
+                addButton.disabled = true;
+                buyButton.disabled = true;
+                buyForm.removeAttribute('action');
+            }
+        }
+
+        const first = rows.find(x => x.stock > 0);
+        if (first) {
+            selectedSize = first.size;
+            selectedColor = first.color;
+        }
+        render();
+    })();
 </script>
 
 <section class="container detail-shell py-5" th:if="${recommendedProducts != null and !#lists.isEmpty(recommendedProducts)}">
