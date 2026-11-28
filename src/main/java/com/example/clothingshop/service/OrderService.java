@@ -2,6 +2,7 @@
 package com.example.clothingshop.service;
 
 import com.example.clothingshop.dto.CheckoutForm;
+import com.example.clothingshop.event.OrderPlacedEvent;
 import com.example.clothingshop.entity.Cart;
 import com.example.clothingshop.entity.CartItem;
 import com.example.clothingshop.entity.OrderItem;
@@ -19,9 +20,13 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -31,14 +36,34 @@ import java.util.UUID;
 @Service
 public class OrderService {
 
+    private static final Logger log = LoggerFactory.getLogger(OrderService.class);
+
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final ShopOrderRepository shopOrderRepository;
     private final OrderItemRepository orderItemRepository;
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @PersistenceContext
     private EntityManager entityManager;
+
+    @Autowired
+    public OrderService(
+            CartRepository cartRepository,
+            CartItemRepository cartItemRepository,
+            ShopOrderRepository shopOrderRepository,
+            OrderItemRepository orderItemRepository,
+            UserRepository userRepository,
+            ApplicationEventPublisher eventPublisher) {
+
+        this.cartRepository = cartRepository;
+        this.cartItemRepository = cartItemRepository;
+        this.shopOrderRepository = shopOrderRepository;
+        this.orderItemRepository = orderItemRepository;
+        this.userRepository = userRepository;
+        this.eventPublisher = eventPublisher;
+    }
 
     public OrderService(
             CartRepository cartRepository,
@@ -46,12 +71,8 @@ public class OrderService {
             ShopOrderRepository shopOrderRepository,
             OrderItemRepository orderItemRepository,
             UserRepository userRepository) {
-
-        this.cartRepository = cartRepository;
-        this.cartItemRepository = cartItemRepository;
-        this.shopOrderRepository = shopOrderRepository;
-        this.orderItemRepository = orderItemRepository;
-        this.userRepository = userRepository;
+        this(cartRepository, cartItemRepository, shopOrderRepository,
+                orderItemRepository, userRepository, event -> {});
     }
 
     @Transactional
@@ -130,7 +151,6 @@ public class OrderService {
                         "Số lượng sản phẩm trong giỏ không hợp lệ.");
             }
 
-            // Lấy khóa ghi trên dòng ProductVariant.
             ProductVariant variant = entityManager.find(
                     ProductVariant.class,
                     variantId,
@@ -142,8 +162,6 @@ public class OrderService {
                         "Không tìm thấy biến thể sản phẩm.");
             }
 
-            // Làm mới dữ liệu sau khi lấy khóa để tránh dùng tồn kho cũ
-            // đã được nạp vào persistence context từ CartItem.
             entityManager.refresh(
                     variant,
                     LockModeType.PESSIMISTIC_WRITE
@@ -194,7 +212,6 @@ public class OrderService {
 
             orderItemRepository.save(orderItem);
 
-            // Trừ tồn kho trong cùng transaction với việc tạo đơn hàng.
             variant.setStockQuantity(stock - quantity);
             entityManager.persist(new StockTransaction(variant, "SALE", -quantity, stock, stock - quantity, order.getOrderCode(), "Xuất kho khi đặt hàng", user));
         }
@@ -207,12 +224,13 @@ public class OrderService {
 
         shopOrderRepository.save(order);
 
-        // Chỉ xóa giỏ hàng sau khi xử lý đặt hàng thành công.
         cartItemRepository.deleteByCart_CartId(cart.getCartId());
 
         cart.setUpdatedAt(LocalDateTime.now());
         cartRepository.save(cart);
 
+        log.info("Đặt hàng thành công, phát sự kiện gửi hóa đơn cho đơn {}.", order.getOrderId());
+        eventPublisher.publishEvent(new OrderPlacedEvent(order.getOrderId()));
         return order;
     }
 
@@ -282,6 +300,8 @@ public class OrderService {
 
         variant.setStockQuantity(stock - quantity);
         entityManager.persist(new StockTransaction(variant, "SALE", -quantity, stock, stock - quantity, order.getOrderCode(), "Xuất kho khi đặt hàng", user));
+        log.info("Đặt hàng thành công, phát sự kiện gửi hóa đơn cho đơn {}.", order.getOrderId());
+        eventPublisher.publishEvent(new OrderPlacedEvent(order.getOrderId()));
         return order;
     }
 
